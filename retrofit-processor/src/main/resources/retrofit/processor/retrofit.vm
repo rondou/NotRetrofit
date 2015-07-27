@@ -1,0 +1,818 @@
+## Template for each generated Retrofit_Foo class.
+## This template uses the Apache Velocity Template Language (VTL).
+## The variables ($pkg, $props, and so on) are defined by the fields of MutableRetrofitTemplateVars.
+##
+## Comments, like this one, begin with ##. The comment text extends up to and including the newline
+## character at the end of the line. So comments also serve to join a line to the next one.
+## Velocity deletes a newline after a directive (#if, #foreach, #end etc) so ## is not needed there.
+## That does mean that we sometimes need an extra blank line after such a directive.
+##
+## A post-processing step will remove unwanted spaces and blank lines, but will not join two lines.
+
+#if (!$pkg.empty)
+package $pkg;
+#end
+
+#foreach ($i in $imports)
+import $i;
+#end
+
+import org.json.JSONObject;
+import org.json.JSONException;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.*;
+
+import com.bluelinelabs.logansquare.LoganSquare;
+
+import android.util.Log;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.ResponseBody;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.MultipartBuilder;
+
+import java.io.IOException;
+import retrofit.converter.*;
+import java.io.*;
+import retrofit.mime.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import com.google.gson.Gson;
+//import com.google.gson.reflect.TypeToken;
+import retrofit.http.TypeToken;
+import retrofit.http.RequestException;
+import retrofit.RetrofitError;
+import retrofit.client.Header;
+import retrofit.RestAdapter.LogLevel;
+import com.squareup.okhttp.HttpUrl;
+import retrofit.RequestInterceptor;
+
+import rx.schedulers.*;
+
+/**
+ * @see "https://github.com/square/okhttp/wiki/Recipes"
+ */
+${gwtCompatibleAnnotation}
+public final class $subclass$formalTypes extends $origClass$actualTypes {
+
+    final OkHttpClient client;
+    public static final String _MIME_APP_JSON = "applications/json";
+    public static final String _CHARSET_UTF8 = "charset=utf-8";
+    public static final String _MIME_APP_JSON_CHARSET_UTF8 = _MIME_APP_JSON + "; " + _CHARSET_UTF8;
+    Converter converter;
+    retrofit.RestAdapter.LogLevel logLevel;
+    retrofit.RequestInterceptor requestInterceptor = retrofit.RequestInterceptor.NONE;
+    retrofit.ErrorHandler errorHandler = retrofit.ErrorHandler.DEFAULT;
+
+## Constructor
+
+    public $subclass() {
+        client = new OkHttpClient();
+
+        try {
+
+#if ($converter != "")
+    #if ($gsonConverter != "")
+
+            this.converter = new ${converter}(new com.google.gson.Gson());
+
+    #else
+
+            this.converter = new ${converter}();
+
+    #end
+#else
+
+            /**
+             * Parse JsonArray
+             * gson.fromJson(jsonString, Wrapper[].class);
+             * mapper.readValue(jsonString, typeFactory.constructCollectionType(List.class, SomeClass.class));
+             */
+
+            this.converter = new retrofit.converter.LoganSquareConverter();
+
+#end
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        this.logLevel = retrofit.RestAdapter.LogLevel.$logLevel;
+
+#if ($requestInterceptor != "")
+
+        this.requestInterceptor = new $requestInterceptor();
+
+#end
+
+#if ($errorHandler != "")
+
+        this.errorHandler = new $errorHandler();
+
+#end
+
+    }
+
+## Property getters
+
+#foreach ($p in $props)
+
+    @Override
+    ${p.access}${p.type} ${p.getter}(${p.args}) {
+
+        Converter myConverter = this.converter;
+
+#if ($p.converter != "")
+
+        try {
+
+    #if ($p.gsonConverter != "")
+
+            myConverter = new ${p.converter}(new com.google.gson.Gson());
+
+    #else
+
+            myConverter = new ${p.converter}();
+
+    #end
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+#end
+
+        final Converter finalConverter = myConverter;
+
+        String _url = "${p.path}";
+        if (!_url.startsWith("http://") && !_url.startsWith("https://")) {
+            _url = "${baseUrl}" + _url;
+        }
+
+        HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(_url).newBuilder();
+
+    #foreach ($query in $p.queries.entrySet())
+
+        httpUrlBuilder.addQueryParameter("${query.key}", $query.value);
+
+    #end
+
+        HttpUrl httpUrl = httpUrlBuilder.build();
+
+        Request.Builder requestBuilder = new Request.Builder().url(httpUrl);
+
+        final String _finalUrl = httpUrl.toString();
+
+        String bodyString = null;
+
+    #if ($p.get)
+
+    #elseif ($p.post)
+        #if ($p.body && $p.body != "")
+
+        TypedOutput typedOutput = null;
+        try {
+            typedOutput = finalConverter.toBody($p.body);
+            bodyString = toString(typedOutput);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+            //throw retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+        }
+        //if (bodyString == null) throw new NullPointerException();
+        requestBuilder.post(RequestBody.create(MediaType.parse(typedOutput.mimeType()), bodyString));
+
+        #elseif (!$p.fields.isEmpty())
+
+        FormEncodingBuilder formBuilder = new FormEncodingBuilder();
+
+            #foreach ($field in $p.fields.entrySet())
+
+        formBuilder.add("$field.key", $field.value);
+
+            #end
+
+        requestBuilder.post(formBuilder.build());
+
+        #end
+    #elseif ($p.put)
+        #if (!$p.parts.isEmpty())
+
+        MultipartBuilder partsBuilder = new MultipartBuilder().type(MultipartBuilder.FORM);
+
+##        String value == null;
+##        MediaType mediaType = null;
+
+            #foreach ($part in $p.parts.entrySet())
+                #if ($part.value.typedFile)
+
+        partsBuilder.addPart(Headers.of("Content-Disposition", "form-data; name=\"${part.key}\""),
+            RequestBody.create(MediaType.parse(${part.value.name}.mimeType()), ${part.value.name}.file()));
+
+                #elseif ($part.value.typedString)
+
+##       mediaType = MediaType.parse(${part.value.name}.mimeType());
+##       toString(${part.value.name});
+##       bodyStringBuilder.append(value);
+
+        partsBuilder.addPart(Headers.of("Content-Disposition", "form-data; name=\"${part.key}\""),
+            RequestBody.create(MediaType.parse(${part.value.name}.mimeType()), ${part.value.name}.toString()));
+
+                #elseif ($part.value.typedByteArray)
+
+        partsBuilder.addPart(Headers.of("Content-Disposition", "form-data; name=\"${part.key}\""),
+            RequestBody.create(MediaType.parse(${part.value.name}.mimeType()), ${part.value.name}.getBytes()));
+
+## new String(bodyBytes, bodyCharset);
+
+                #elseif ($part.value.mimeType != "")
+
+                ## elseif ($part.value.file)
+
+        partsBuilder.addPart(Headers.of("Content-Disposition", "form-data; name=\"${part.key}\""),
+            RequestBody.create(MediaType.parse("${part.value.mimeType}"), ${part.value.name}));
+
+                #else
+
+        partsBuilder.addFormDataPart("${part.key}", ${part.value.name});
+
+                #end
+            #end
+
+        requestBuilder.put(partsBuilder.build());
+
+        #else
+
+        requestBuilder.put(RequestBody.create(MediaType.parse(_MIME_APP_JSON_CHARSET_UTF8), ""));
+
+        #end
+
+    #elseif ($p.delete)
+
+        requestBuilder.delete();
+
+    #elseif ($p.head)
+
+        requestBuilder.head();
+
+    #end
+
+    #foreach ($header in $headers.entrySet())
+
+        requestBuilder.addHeader("$header.key", $header.value);
+
+    #end
+
+    #foreach ($header in $p.headers.entrySet())
+
+        requestBuilder.addHeader("$header.key", $header.value);
+
+    #end
+
+        Request request = requestBuilder.build();
+
+    #if ($requestInterceptor != "")
+
+        SimpleRequestFacade requestFacade = new SimpleRequestFacade(request);
+        requestInterceptor.intercept(requestFacade);
+        request = requestFacade.request();
+
+    #end
+
+        if (logLevel.log()) {
+            // Log the request data.
+            try {
+              request = logAndReplaceRequest("HTTP", request, bodyString);
+            } catch (IOException e) {
+            }
+        }
+
+        Observable<com.squareup.okhttp.Response> responseCachedObs = Observable.create(new OnSubscribeResponse(client, request)).doOnNext(new Action1<com.squareup.okhttp.Response>() {
+            @Override public void call(com.squareup.okhttp.Response response) {
+            }
+
+    #if (!$retryHeaders.isEmpty())
+
+        }).onErrorResumeNext(new Func1<Throwable, Observable<com.squareup.okhttp.Response>>() {
+            @Override public Observable<com.squareup.okhttp.Response> call(Throwable e) {
+                if (e instanceof RequestException) {
+                    RequestException requestException = (RequestException) e;
+                    Request.Builder reqBuilder = requestException.request().newBuilder();
+
+        #foreach ($header in $retryHeaders.entrySet())
+
+                    reqBuilder.addHeader("$header.key", $header.value);
+
+        #end
+
+                    return Observable.create(new OnSubscribeResponse(client, reqBuilder.build()));
+                }
+                return Observable.error(e);
+            }
+
+    #end
+
+        #if ($errorHandler != "")
+
+        }).onErrorResumeNext(new Func1<Throwable, Observable<com.squareup.okhttp.Response>>() {
+            @Override public Observable<com.squareup.okhttp.Response> call(Throwable e) {
+                if (e instanceof IOException) {
+                    return Observable.error(retrofit.RetrofitError.networkError(_finalUrl, (IOException) e));
+                }
+                return Observable.error(e);
+            }
+
+        #end
+
+        })
+        .cache();
+
+    #if (!$p.responseType)
+        #if ($p.observable)
+
+        $p.type obs;
+
+        #elseif ($p.callback)
+
+        Observable<$p.typeArgs> obs;
+
+        #else
+
+        Observable<$p.type> obs;
+
+        #end
+
+        obs = responseCachedObs.map(new Func1<com.squareup.okhttp.Response, String>() {
+            @Override public String call(com.squareup.okhttp.Response response) {
+                try {
+                    return response.body().string();
+                } catch (Exception e) {
+                    //throw new RuntimeException(e);
+                    throw retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+                }
+            }
+        }).filter(new Func1<String, Boolean>() {
+            @Override public Boolean call(String json) {
+                return json != null;
+            }
+        }).map(new Func1<String, $p.typeArgs>() {
+            @Override public $p.typeArgs call(String json) {
+                // TODO Using RetrofitConveter
+                try {
+                    if (logLevel.ordinal() >= LogLevel.FULL.ordinal()) {
+                        log.log(json);
+                    }
+
+        #if ($p.typeArgs2 != "")
+
+                    Type type = new TypeToken<${p.typeArgs}>(){}.getType();
+                    return (${p.typeArgs}) finalConverter.fromBody(new JsonTypedInput(json), type);
+
+        #else
+
+                    return (${p.typeArgs}) finalConverter.fromBody(new JsonTypedInput(json), ${p.typeArgs}.class);
+
+        #end
+
+                } catch (Exception e) {
+                    //throw new RuntimeException(e);
+                    throw retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+                }
+            }
+        }).filter(new Func1<$p.typeArgs, Boolean>() {
+            @Override public Boolean call($p.typeArgs object) {
+                return object != null;
+            }
+        });
+
+    #end
+
+        Observable<retrofit.client.Response> retrofitResponseObs = responseCachedObs.map(new Func1<com.squareup.okhttp.Response, retrofit.client.Response>() {
+            @Override public retrofit.client.Response call(com.squareup.okhttp.Response response) {
+                return parseResponse(response);
+            }
+        });
+
+    #if ($p.blocking)
+        #if ($p.responseType)
+
+        return retrofitResponseObs
+
+        #if ($errorHandler != "")
+
+            .onErrorResumeNext(new Func1<Throwable, Observable<retrofit.client.Response>>() {
+                @Override public Observable<retrofit.client.Response> call(Throwable e) {
+                    retrofit.RetrofitError retrofitError = null;
+                    if (e instanceof retrofit.RetrofitError) {
+                        retrofitError = (retrofit.RetrofitError) e;
+                    } else {
+                        retrofitError = retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+                    }
+                    // network error should be handled before
+                    if (retrofitError.getKind() == RetrofitError.Kind.NETWORK) {
+                        return Observable.error(retrofitError);
+                    }
+                    return Observable.error(errorHandler.handleError(retrofitError));
+                }
+            })
+
+        #end
+
+            .subscribeOn(Schedulers.io()).toBlocking().single();
+
+        #else
+
+        return obs
+
+        #if ($errorHandler != "")
+
+            .onErrorResumeNext(new Func1<Throwable, Observable<$p.type>>() {
+                @Override public Observable<$p.type> call(Throwable e) {
+                    retrofit.RetrofitError retrofitError = null;
+                    if (e instanceof retrofit.RetrofitError) {
+                        retrofitError = (retrofit.RetrofitError) e;
+                    } else {
+                        retrofitError = retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+                    }
+                    return Observable.error(errorHandler.handleError(retrofitError));
+                }
+            })
+
+        #end
+
+            .subscribeOn(Schedulers.io()).toBlocking().single();
+
+        #end
+    #elseif ($p.callback)
+        #if ($p.responseType) // Callback<Response>
+
+        retrofitResponseObs
+
+        #if ($errorHandler != "")
+
+            .onErrorResumeNext(new Func1<Throwable, Observable<$p.typeArgs>>() {
+                @Override public Observable<$p.typeArgs> call(Throwable e) {
+                    retrofit.RetrofitError retrofitError = null;
+                    if (e instanceof retrofit.RetrofitError) {
+                        retrofitError = (retrofit.RetrofitError) e;
+                    } else {
+                        retrofitError = retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+                    }
+                    return Observable.error(errorHandler.handleError(retrofitError));
+                }
+            })
+
+        #end
+
+            .subscribeOn(Schedulers.io()).subscribe(new Action1<$p.typeArgs>() {
+            @Override public void call($p.typeArgs object) {
+                ${p.callbackName}.success(object, object);
+            }
+        }, new Action1<Throwable>() {
+            @Override public void call(Throwable e) {
+                ${p.callbackName}.failure(retrofit.RetrofitError.unexpectedError(_finalUrl, e));
+            }
+        });
+
+        #else // Callback<MODEL>
+
+        Observable.zip(retrofitResponseObs, obs, new Func2<retrofit.client.Response, $p.typeArgs, $p.typeArgs>() {
+            @Override public $p.typeArgs call(retrofit.client.Response response, $p.typeArgs object) {
+                ${p.callbackName}.success(object, response);
+                return object;
+            }
+        })
+
+        #if ($errorHandler != "")
+
+        .onErrorResumeNext(new Func1<Throwable, Observable<$p.typeArgs>>() {
+            @Override public Observable<$p.typeArgs> call(Throwable e) {
+                retrofit.RetrofitError retrofitError = null;
+                if (e instanceof retrofit.RetrofitError) {
+                    retrofitError = (retrofit.RetrofitError) e;
+                } else {
+                    retrofitError = retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+                }
+                return Observable.error(errorHandler.handleError(retrofitError));
+            }
+        })
+
+        #end
+
+        .subscribeOn(Schedulers.io()).subscribe(new Action1<$p.typeArgs>() {
+            @Override public void call($p.typeArgs object) {
+            }
+        }, new Action1<Throwable>() {
+            @Override public void call(Throwable e) {
+                ${p.callbackName}.failure(retrofit.RetrofitError.unexpectedError(_finalUrl, e));
+            }
+        });
+
+        #end
+    #else
+        #if ($p.responseType)
+
+        return retrofitResponseObs;
+
+        #else
+
+        return obs
+
+        #if ($errorHandler != "")
+
+        .onErrorResumeNext(new Func1<Throwable, Observable<$p.typeArgs>>() {
+            @Override public Observable<$p.typeArgs> call(Throwable e) {
+                retrofit.RetrofitError retrofitError = null;
+                if (e instanceof retrofit.RetrofitError) {
+                    retrofitError = (retrofit.RetrofitError) e;
+                } else {
+                    retrofitError = retrofit.RetrofitError.unexpectedError(_finalUrl, e);
+                }
+                return Observable.error(errorHandler.handleError(retrofitError));
+            }
+        })
+
+        #end
+
+            ;
+
+        #end
+    #end
+
+    }
+#end
+
+    // TODO onUnSubscribe to call.cancel();
+    public static class OnSubscribeResponse implements Observable.OnSubscribe<com.squareup.okhttp.Response> {
+        final Request request;
+        final OkHttpClient client;
+
+        public OnSubscribeResponse(OkHttpClient client, Request request) {
+            this.request = request;
+            this.client = client;
+        }
+
+        @Override
+        public void call(final Subscriber<? super com.squareup.okhttp.Response> sub) {
+            try {
+                client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
+                    @Override public void onFailure(Request r, IOException e) {
+                        sub.onError(new RequestException(r, e));
+                    }
+                    @Override public void onResponse(com.squareup.okhttp.Response response) {
+                        sub.onNext(response);
+                        sub.onCompleted();
+                    }
+                });
+            } catch (Exception e) {
+                sub.onError(e);
+            }
+        }
+    }
+
+    public static class JsonTypedInput implements TypedInput {
+        public static final String MIME_APP_JSON = "applications/json";
+        public static final String CHARSET_UTF8 = "charset=utf-8";
+        public static final String MIME_APP_JSON_CHARSET_UTF8 = MIME_APP_JSON + "; " + _CHARSET_UTF8;
+        private final byte[] bytes;
+        private final InputStream in;
+
+        public JsonTypedInput(String json) {
+            bytes = json.getBytes(); // json.getBytes(java.nio.charset.StandardCharsets.UTF_8.toString());
+            in = new ByteArrayInputStream(json.getBytes());
+        }
+
+        @Override public InputStream in() {
+            return in;
+        }
+        @Override public long length() {
+            return bytes.length;
+        }
+        @Override public String mimeType() {
+            return MIME_APP_JSON_CHARSET_UTF8;
+        }
+    }
+
+    public static String toString(TypedOutput typedOutput) {
+        String string = null;
+        try {
+            ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
+            typedOutput.writeTo(bytesOutputStream);
+            string = bytesOutputStream.toString(); // bytesOutputStream.toString(java.nio.charset.StandardCharsets.UTF_8.toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return string;
+    }
+
+    public static class SimpleRequestFacade implements RequestInterceptor.RequestFacade {
+        Request.Builder requestBuilder;
+        HttpUrl.Builder httpUrlBuilder;
+        String path;
+
+        public SimpleRequestFacade(Request request) {
+            this.requestBuilder = request.newBuilder();
+            HttpUrl httpUrl = request.httpUrl();
+            this.path = java.net.URLDecoder.decode(httpUrl.encodedPath());
+            this.httpUrlBuilder = httpUrl.newBuilder();
+        }
+
+        public Request.Builder requestBuilder() {
+            httpUrlBuilder.encodedPath(path);
+            return requestBuilder;
+        }
+
+        public Request request() {
+            return requestBuilder().url(httpUrlBuilder.build()).build();
+        }
+
+        @Override public void addEncodedPathParam(String name, String value) {
+            if (name == null || "".equals(name)) {
+                path += "/" + value;
+            } else {
+                path = path.replace("{" + name + "}", value);
+            }
+        }
+        @Override public void addEncodedQueryParam(String name, String value) {
+            httpUrlBuilder.addEncodedQueryParameter(name, value);
+        }
+        @Override public void addHeader(String name, String value) {
+            requestBuilder.addHeader(name, value);
+        }
+        @Override public void addPathParam(String name, String value) {
+            addEncodedPathParam(java.net.URLDecoder.decode(name), java.net.URLDecoder.decode(value));
+        }
+        @Override public void addQueryParam(String name, String value) {
+            httpUrlBuilder.addQueryParameter(name, value);
+        }
+    }
+
+    static retrofit.client.Response parseResponse(com.squareup.okhttp.Response response) {
+        return new retrofit.client.Response(response.request().urlString(), response.code(), response.message(),
+                createHeaders(response.headers()), createResponseBody(response.body()));
+    }
+
+    private static TypedInput createResponseBody(final ResponseBody body) {
+        try {
+            if (body.contentLength() == 0) {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return new TypedInput() {
+            @Override public String mimeType() {
+                MediaType mediaType = body.contentType();
+                return mediaType == null ? null : mediaType.toString();
+            }
+
+            @Override public long length() {
+                try {
+                    return body.contentLength();
+                } catch (IOException e) {
+                    return 0L;
+                }
+            }
+
+            @Override public InputStream in() throws IOException {
+                return body.byteStream();
+            }
+        };
+    }
+
+    private static List<Header> createHeaders(Headers headers) {
+        int size = headers.size();
+        List<Header> headerList = new ArrayList<Header>(size);
+        for (int i = 0; i < size; i++) {
+            headerList.add(new Header(headers.name(i), headers.value(i)));
+        }
+        return headerList;
+    }
+
+    /** Simple logging abstraction for debug messages. */
+    public interface Log {
+        /** Log a debug message to the appropriate console. */
+        void log(String message);
+
+        /** A {@link Log} implementation which does not log anything. */
+        Log NONE = new Log() {
+            @Override public void log(String message) {
+            }
+        };
+    }
+
+    // TODO @Log()
+    private Log log = new Log() {
+        @Override public void log(String message) {
+            System.out.println(message);
+        }
+    };
+
+  /** Log request headers and body. Consumes request body and returns identical replacement. */
+  Request logAndReplaceRequest(String name, Request request, String bodyString) throws IOException {
+      log.log(String.format("---> %s %s %s", name, request.method(), request.urlString()));
+
+      if (logLevel.ordinal() >= LogLevel.HEADERS.ordinal()) {
+          log.log(request.headers().toString());
+
+          String bodySize = "no";
+          RequestBody body = request.body();
+          if (body != null) {
+              MediaType type = body.contentType();
+              if (type != null) {
+                  log.log("Content-Type: " + type);
+              }
+
+              long bodyLength = body.contentLength();
+              bodySize = bodyLength + "-byte";
+              if (bodyLength != -1) {
+                  log.log("Content-Length: " + bodyLength);
+              }
+
+              if (logLevel.ordinal() >= LogLevel.FULL.ordinal()) {
+                  if (request.headers().size() > 0) {
+                      log.log("");
+                  }
+                  log.log(bodyString);
+              } else if (logLevel.ordinal() >= LogLevel.HEADERS_AND_ARGS.ordinal()) {
+                  if (request.headers().size() > 0) {
+                      log.log("---> REQUEST:");
+                  }
+                  // TODO args
+              }
+          }
+
+          log.log(String.format("---> END %s (%s body)", name, bodySize));
+      }
+
+      return request;
+  }
+
+  /** Log response headers and body. Consumes response body and returns identical replacement. */
+  /*
+  private Response logAndReplaceResponse(String url, Response response, long elapsedTime)
+      throws IOException {
+    log.log(String.format("<--- HTTP %s %s (%sms)", response.getStatus(), url, elapsedTime));
+
+    if (logLevel.ordinal() >= LogLevel.HEADERS.ordinal()) {
+      for (Header header : response.getHeaders()) {
+        log.log(header.toString());
+      }
+
+      long bodySize = 0;
+      TypedInput body = response.getBody();
+      if (body != null) {
+        bodySize = body.length();
+
+        if (logLevel.ordinal() >= LogLevel.FULL.ordinal()) {
+          if (!response.getHeaders().isEmpty()) {
+            log.log("");
+          }
+
+          if (!(body instanceof TypedByteArray)) {
+            // Read the entire response body so we can log it and replace the original response
+            response = Utils.readBodyToBytesIfNecessary(response);
+            body = response.getBody();
+          }
+
+          byte[] bodyBytes = ((TypedByteArray) body).getBytes();
+          bodySize = bodyBytes.length;
+          String bodyMime = body.mimeType();
+          String bodyCharset = MimeUtil.parseCharset(bodyMime, "UTF-8");
+          log.log(new String(bodyBytes, bodyCharset));
+        }
+      }
+
+      log.log(String.format("<--- END HTTP (%s-byte body)", bodySize));
+    }
+
+    return response;
+  }
+
+  private void logResponseBody(TypedInput body, Object convert) {
+    if (logLevel.ordinal() == LogLevel.HEADERS_AND_ARGS.ordinal()) {
+      log.log("<--- BODY:");
+      log.log(convert.toString());
+    }
+  }
+  */
+
+  /** Log an exception that occurred during the processing of a request or response. */
+  /*
+  void logException(Throwable t, String url) {
+    log.log(String.format("---- ERROR %s", url != null ? url : ""));
+    StringWriter sw = new StringWriter();
+    t.printStackTrace(new PrintWriter(sw));
+    log.log(sw.toString());
+    log.log("---- END ERROR");
+  }
+  */
+}

@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply from: 'deploy.gradle'
+
+targetCompatibility = '1.6'
+sourceCompatibility = '1.6'
+
+repositories {
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    //compile 'com.github.yongjhih:converter-logansquare-retrofit:-SNAPSHOT'
+    compile 'com.infstory:converter-logansquare-retrofit:1.0.0'
+    compile 'com.squareup.okhttp:okhttp:2.4.0'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'io.reactivex:rxjava:1.0.9'
+}
+
+tasks.withType(Test) {
+  testLogging {
+    exceptionFormat "full"
+    events "passed", "skipped", "failed"
+  }
+}
