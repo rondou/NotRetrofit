@@ -354,6 +354,8 @@ abstract class GitHub {
 
 ## Support `@RetryHeaders`
 
+*Experiment feature*
+
 For Retry Stale example:
 
 ```java
