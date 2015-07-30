@@ -20,6 +20,8 @@ import retrofit.http.Retrofit.RequestInterceptor;
 import retrofit.http.Retrofit.LogLevel;
 import retrofit.http.Retrofit.Bindable;
 import retrofit.http.Retrofit.QueryBinding;
+import retrofit.http.Retrofit.Authenticator;
+import retrofit.http.Retrofit.Authenticated;
 
 import rx.Observable;
 import java.io.File;
@@ -32,6 +34,7 @@ import retrofit.mime.TypedString;
 import com.github.mobile.model.*;
 import retrofit.client.Response;
 import retrofit.Callback;
+import android.app.Activity;
 
 @Retrofit("https://api.github.com")
 @retrofit.http.Retrofit.Headers({ // optional
@@ -45,10 +48,13 @@ import retrofit.Callback;
 @Retrofit.Converter(GsonConverter.class) // optional
 //@Retrofit.Converter(LoganSquareConverter.class) // default
 @LogLevel(retrofit.RestAdapter.LogLevel.FULL) // optional
-@RequestInterceptor(GitHubRequestInterceptor.class)
-@ErrorHandler(GitHubErrorHandler.class)
+@RequestInterceptor(GitHubRequestInterceptor.class) // optional
+@ErrorHandler(GitHubErrorHandler.class) // optional
+@Authenticator(GitHubAuthenticator.class) // optional
 public abstract class GitHub {
+    //@Retrofit.GET(value = "/repos/{owner}/{repo}/contributors", permissions = "public_repo")
     @GET("/repos/{owner}/{repo}/contributors")
+    @Authenticated
     public abstract Observable<List<Contributor>> contributorList(
             @Path("owner") String owner,
             @Path("repo") String repo);
@@ -272,5 +278,10 @@ public abstract class GitHub {
 
     public static GitHub create() {
         return new Retrofit_GitHub();
+    }
+
+    // promise parameter
+    public static GitHub create(Activity activity) {
+        return new Retrofit_GitHub(activity);
     }
 }

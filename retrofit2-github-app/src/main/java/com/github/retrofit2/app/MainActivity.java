@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        github = GitHub.create();
+        github = GitHub.create(this);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupAdapter(Adapter adapter) {
         adapter.fragments.add(FragmentPage.create().title("yongjhih").fragment(() -> {
             return RxCardsFragment.create()
-                .items(Observable.defer(() -> github.repositories("yongjhih").take(1280).toSortedList((a, b) -> {
+                .items(Observable.defer(() -> github.repositories("yongjhih").toSortedList((a, b) -> {
                     return b.stargazers_count - a.stargazers_count;
                 }).flatMap(list -> Observable.from(list)).map(repo -> {
                     RxCard card = new RxCard();
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         }));
         adapter.fragments.add(FragmentPage.create().title("yongjhih/retrofit2").fragment(() -> {
             return RxCardsFragment.create()
-                .items(Observable.defer(() -> github.contributors("yongjhih", "retrofit2").take(1280).map(contributor -> {
+                .items(Observable.defer(() -> github.contributors("yongjhih", "retrofit2").map(contributor -> {
                     RxCard card = new RxCard();
                     card.icon = Observable.just(contributor.avatar_url);
                     card.text1 = Observable.just(contributor.login);
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         }));
         adapter.fragments.add(FragmentPage.create().title("8tory").fragment(() -> {
             return RxCardsFragment.create()
-                .items(Observable.defer(() -> github.orgRepositories("8tory").take(1280).toSortedList((a, b) -> {
+                .items(Observable.defer(() -> github.orgRepositories("8tory").toSortedList((a, b) -> {
                     return b.stargazers_count - a.stargazers_count;
                 }).flatMap(list -> Observable.from(list)).map(repo -> {
                     RxCard card = new RxCard();
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         }));
         adapter.fragments.add(FragmentPage.create().title("8tory/json2notification").fragment(() -> {
             return RxCardsFragment.create()
-                .items(Observable.defer(() -> github.contributors("8tory", "json2notification").take(1280).map(contributor -> {
+                .items(Observable.defer(() -> github.contributors("8tory", "json2notification").map(contributor -> {
                     RxCard card = new RxCard();
                     card.icon = Observable.just(contributor.avatar_url);
                     card.text1 = Observable.just(contributor.login);
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         }));
         adapter.fragments.add(FragmentPage.create().title("yongjhih/RetroFacebook").fragment(() -> {
             return RxCardsFragment.create()
-                .items(Observable.defer(() -> github.contributors("yongjhih", "RetroFacebook").take(1280).map(contributor -> {
+                .items(Observable.defer(() -> github.contributors("yongjhih", "RetroFacebook").map(contributor -> {
                     RxCard card = new RxCard();
                     card.icon = Observable.just(contributor.avatar_url);
                     card.text1 = Observable.just(contributor.login);
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         }));
         adapter.fragments.add(FragmentPage.create().title("yongjhih/proguard-annotations").fragment(() -> {
             return RxCardsFragment.create()
-                .items(Observable.defer(() -> github.contributors("yongjhih", "proguard-annotations").take(1280).map(contributor -> {
+                .items(Observable.defer(() -> github.contributors("yongjhih", "proguard-annotations").map(contributor -> {
                     RxCard card = new RxCard();
                     card.icon = Observable.just(contributor.avatar_url);
                     card.text1 = Observable.just(contributor.login);
@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
         }));
         adapter.fragments.add(FragmentPage.create().title("yongjhih/RxParse").fragment(() -> {
             return RxCardsFragment.create()
-                .items(Observable.defer(() -> github.contributors("yongjhih", "RxParse").take(1280).map(contributor -> {
+                .items(Observable.defer(() -> github.contributors("yongjhih", "RxParse").map(contributor -> {
                     RxCard card = new RxCard();
                     card.icon = Observable.just(contributor.avatar_url);
                     card.text1 = Observable.just(contributor.login);

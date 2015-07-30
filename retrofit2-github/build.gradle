@@ -29,6 +29,7 @@ dependencies {
     compile project(':retrofit')
     apt project(':retrofit-processor')
     compile 'io.reactivex:rxjava:1.0.9'
+    compile 'io.reactivex:rxandroid:0.24.0'
     compile 'com.squareup.okhttp:okhttp:2.4.0'
     //compile 'com.infstory:logansquare:1.1.1'
     //apt 'com.infstory:logansquare-compiler:1.1.1'

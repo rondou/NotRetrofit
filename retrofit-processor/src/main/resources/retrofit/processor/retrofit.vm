@@ -73,9 +73,17 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     retrofit.RequestInterceptor requestInterceptor = retrofit.RequestInterceptor.NONE;
     retrofit.ErrorHandler errorHandler = retrofit.ErrorHandler.DEFAULT;
 
+    retrofit.http.Retrofit.RequestAuthenticator requestAuthenticator;
+    Object context;
+
 ## Constructor
 
     public $subclass() {
+        this(null);
+    }
+
+    public $subclass(Object object) {
+        this.context = object;
         client = new OkHttpClient();
 
         try {
@@ -117,6 +125,12 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 #if ($errorHandler != "")
 
         this.errorHandler = new $errorHandler();
+
+#end
+
+#if ($authenticator != "")
+
+        this.requestAuthenticator = new $authenticator();
 
 #end
 
@@ -278,25 +292,68 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     #end
 
         Request request = requestBuilder.build();
+        Observable<Request> requestObs = Observable.just(request);
+
+        System.out.println("retrofit: ${p.getter}");
 
     #if ($requestInterceptor != "")
 
-        SimpleRequestFacade requestFacade = new SimpleRequestFacade(request);
-        requestInterceptor.intercept(requestFacade);
-        request = requestFacade.request();
+        requestObs = requestObs.map(new Func1<Request, Request>() {
+            @Override public Request call(Request request) {
+                System.out.println("retrofit: requestInterceptor");
+                SimpleRequestFacade requestFacade = new SimpleRequestFacade(request);
+                requestInterceptor.intercept(requestFacade);
+                return requestFacade.request();
+            }
+        });
 
     #end
 
-        if (logLevel.log()) {
-            // Log the request data.
-            try {
-              request = logAndReplaceRequest("HTTP", request, bodyString);
-            } catch (IOException e) {
-            }
-        }
+    #if ($authenticator != "" && ($p.authenticated || $authenticated))
 
-        Observable<com.squareup.okhttp.Response> responseCachedObs = Observable.create(new OnSubscribeResponse(client, request)).doOnNext(new Action1<com.squareup.okhttp.Response>() {
-            @Override public void call(com.squareup.okhttp.Response response) {
+        requestObs = requestObs.map(new Func1<Request, Request>() {
+            @Override public Request call(Request request) {
+                System.out.println("retrofit: authorize");
+                List<String> permissions = new ArrayList<>();
+
+        #foreach ($permission in $p.permissions)
+
+                permissions.add("$permission");
+
+        #end
+
+                SimpleRequestFacade requestAuthenticatorFacade = new SimpleRequestFacade(request);
+                requestAuthenticator.authorize(context, permissions);
+                requestAuthenticator.intercept(requestAuthenticatorFacade);
+                return requestAuthenticatorFacade.request();
+            }
+        }).subscribeOn(Schedulers.io());
+
+    #end
+
+        final String finalBodyString = bodyString;
+
+        requestObs = requestObs.map(new Func1<Request, Request>() {
+            @Override public Request call(Request request) {
+                System.out.println("retrofit: log");
+                if (logLevel.log()) {
+                    // Log the request data.
+                    try {
+                        return logAndReplaceRequest("HTTP", request, finalBodyString);
+                    } catch (IOException e) {
+                        throw retrofit.RetrofitError.unexpectedError(request.urlString(), e);
+                    }
+                }
+
+                return request;
+            }
+        });
+
+        Observable<com.squareup.okhttp.Response> responseCachedObs = requestObs.flatMap(new Func1<Request, Observable<com.squareup.okhttp.Response>>() {
+            @Override public Observable<com.squareup.okhttp.Response> call(Request request) {
+                System.out.println("retrofit: responseCachedObs");
+
+                return Observable.create(new OnSubscribeResponse(client, request));
             }
 
     #if (!$retryHeaders.isEmpty())

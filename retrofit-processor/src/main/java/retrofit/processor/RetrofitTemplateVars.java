@@ -146,6 +146,9 @@ class RetrofitTemplateVars extends TemplateVars {
 
   String requestInterceptor = "";
 
+  String authenticator = "";
+  Boolean authenticated = false;
+
   /**
    * The simple names of validation methods (marked {@code @Retrofit.Validate}) in the Retrofit
    * class. (Currently, this set is either empty or a singleton.)

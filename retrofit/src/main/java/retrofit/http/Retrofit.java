@@ -27,6 +27,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 
 import java.util.List;
+import java.util.Collection;
 import rx.functions.*;
 
 /**
@@ -644,5 +645,21 @@ public @interface Retrofit {
   @Retention(RUNTIME)
   @Target(METHOD)
   public @interface Streaming {
+  }
+
+  @Retention(RUNTIME)
+  @Target({METHOD, TYPE})
+  public @interface Authenticated {
+    Class<? extends RequestAuthenticator> value() default RequestAuthenticator.class;
+  }
+
+  @Retention(RUNTIME)
+  @Target({METHOD, TYPE})
+  public @interface Authenticator {
+    Class<? extends RequestAuthenticator> value() default RequestAuthenticator.class;
+  }
+
+  public interface RequestAuthenticator extends retrofit.RequestInterceptor {
+      String authorize(Object context, Collection<String> permissions);
   }
 }

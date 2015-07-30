@@ -260,6 +260,7 @@ public class RetrofitProcessor extends AbstractProcessor {
     private final ProcessingEnvironment processingEnv;
     private final TypeSimplifier typeSimplifier;
     private final List<String> permissions;
+    private final boolean isAuthenticated;
     private final Map<String, String> headers;
     private final Map<String, String> fields;
     private final Map<String, Part> parts;
@@ -294,6 +295,7 @@ public class RetrofitProcessor extends AbstractProcessor {
       this.isPost = buildIsPost(method);
       this.isDelete = buildIsDelete(method);
       this.isHead = buildIsHead(method);
+      this.isAuthenticated = buildIsAuthenticated(method);
       this.isObservable = buildIsObservable(method);
       this.body = buildBody(method);
       this.callbackTypeMirror = buildCallbackTypeMirror(method);
@@ -491,6 +493,10 @@ public class RetrofitProcessor extends AbstractProcessor {
     public boolean buildIsHead(ExecutableElement method) {
       // TODO duplicated routine
       return method.getAnnotation(Retrofit.HEAD.class) != null || method.getAnnotation(retrofit.http.HEAD.class) != null;
+    }
+
+    public boolean buildIsAuthenticated(ExecutableElement method) {
+      return method.getAnnotation(Retrofit.Authenticated.class) != null;
     }
 
     public String buildBody(ExecutableElement method) {
@@ -910,6 +916,10 @@ public class RetrofitProcessor extends AbstractProcessor {
       return isHead;
     }
 
+    public boolean isAuthenticated() {
+      return isAuthenticated;
+    }
+
     public List<String> getAnnotations() {
       return annotations;
     }
@@ -1199,6 +1209,29 @@ public class RetrofitProcessor extends AbstractProcessor {
         requestInterceptor = mte.getTypeMirror();
       }
       vars.requestInterceptor = typeSimplifier.simplify(requestInterceptor);
+    }
+    Retrofit.Authenticator authenticatorAnnotation = type.getAnnotation(Retrofit.Authenticator.class);
+    if (authenticatorAnnotation != null) {
+      TypeMirror authenticator = null;
+      try {
+        authenticator = getTypeMirror(authenticatorAnnotation.value());
+      } catch (MirroredTypeException mte) {
+        // http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
+        authenticator = mte.getTypeMirror();
+      }
+      vars.authenticator = typeSimplifier.simplify(authenticator);
+    }
+    Retrofit.Authenticated authenticatedAnnotation = type.getAnnotation(Retrofit.Authenticated.class);
+    if (authenticatedAnnotation != null) {
+      TypeMirror authenticatedType = null;
+      try {
+        authenticatedType = getTypeMirror(authenticatedAnnotation.value());
+      } catch (MirroredTypeException mte) {
+        // http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
+        authenticatedType = mte.getTypeMirror();
+      }
+      String authenticated = typeSimplifier.simplify(authenticatedType);
+      vars.authenticated = authenticated != null && !"".equals(authenticated);
     }
 
     TypeElement parcelable = processingEnv.getElementUtils().getTypeElement("android.os.Parcelable");
