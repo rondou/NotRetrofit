@@ -50,11 +50,10 @@ import android.app.Activity;
 @LogLevel(retrofit.RestAdapter.LogLevel.FULL) // optional
 @RequestInterceptor(GitHubRequestInterceptor.class) // optional
 @ErrorHandler(GitHubErrorHandler.class) // optional
-@Authenticator(GitHubAuthenticator.class) // optional
 public abstract class GitHub {
-    //@Retrofit.GET(value = "/repos/{owner}/{repo}/contributors", permissions = "public_repo")
     @GET("/repos/{owner}/{repo}/contributors")
-    @Authenticated
+    //@Authenticator(GitHubAuthenticator.class)
+    @RequestInterceptor(GitHubAuthInterceptor.class)
     public abstract Observable<List<Contributor>> contributorList(
             @Path("owner") String owner,
             @Path("repo") String repo);

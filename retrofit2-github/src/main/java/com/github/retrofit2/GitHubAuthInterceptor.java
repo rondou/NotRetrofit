@@ -16,6 +16,7 @@ package com.github.retrofit2;
 import retrofit.RequestInterceptor;
 import retrofit.http.Retrofit.RequestAuthenticator;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import android.content.Context;
@@ -31,30 +32,16 @@ import rx.functions.*;
 import javax.inject.Singleton;
 
 @Singleton
-public class GitHubAuthenticator implements RequestAuthenticator {
+public class GitHubAuthInterceptor extends retrofit.http.Retrofit.SimpleRequestInterceptor {
     // TODO persistents
     String token;
-    List<String> activePermissions;
 
     @Override
-    public void intercept(RequestFacade request) {
-        System.out.println("retrogithub: intercept");
+    public void intercept(Object context, RequestFacade request) {
+        if (token == null) {
+            token = getAuthToken((Activity) context, Collections.<String>emptyList());
+        }
         if (token != null) request.addHeader("Authorization", "Bearer " + token);
-    }
-
-    @Override
-    public String authorize(Object context, Collection<String> permissions) {
-        System.out.println("retrogithub: authorize");
-        List<String> neededPermissions = new ArrayList<>(permissions);
-        if (token != null) {
-            neededPermissions.removeAll(activePermissions);
-            if (neededPermissions.isEmpty()) return token;
-        }
-        token = getAuthToken((Activity) context, permissions);
-        if (token != null) {
-            activePermissions = new ArrayList<>(permissions);
-        }
-        return token;
     }
 
     public String getAuthToken(Activity activity, Collection<String> permissions) {

@@ -19,6 +19,7 @@ dependencies {
   compile 'com.squareup.retrofit:retrofit:1.9.0'
   compile 'io.reactivex:rxjava:1.0.9'
   compile 'com.squareup.okhttp:okhttp:2.4.0'
+  compile 'javax.inject:javax.inject:1'
 
   testCompile files(System.getenv("JAVA_HOME") + "/lib/tools.jar")
   testCompile 'com.google.guava:guava-testlib:17.0'

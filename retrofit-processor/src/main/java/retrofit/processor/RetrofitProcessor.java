@@ -261,6 +261,7 @@ public class RetrofitProcessor extends AbstractProcessor {
     private final TypeSimplifier typeSimplifier;
     private final List<String> permissions;
     private final boolean isAuthenticated;
+    private final boolean isSingletonRequestInterceptor;
     private final Map<String, String> headers;
     private final Map<String, String> fields;
     private final Map<String, Part> parts;
@@ -269,6 +270,7 @@ public class RetrofitProcessor extends AbstractProcessor {
     public String gsonConverter = "";
     public final String errorHandler;
     public final String logLevel;
+    public final String requestInterceptor;
 
     Property(
         String name,
@@ -322,6 +324,24 @@ public class RetrofitProcessor extends AbstractProcessor {
       this.converter = buildConverter(method);
       this.errorHandler = buildErrorHandler(method);
       this.logLevel = buildLogLevel(method);
+      this.requestInterceptor = buildRequestInterceptor(method);
+      this.isSingletonRequestInterceptor = buildIsSingletonRequestInterceptor(method);
+    }
+
+    private String buildRequestInterceptor(ExecutableElement method) {
+      String name = "";
+      Retrofit.RequestInterceptor requestInterceptorAnnotation = method.getAnnotation(Retrofit.RequestInterceptor.class);
+      if (requestInterceptorAnnotation != null) {
+        TypeMirror requestInterceptor = null;
+        try {
+          requestInterceptor = getTypeMirror(processingEnv, requestInterceptorAnnotation.value());
+        } catch (MirroredTypeException mte) {
+          // http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
+          requestInterceptor = mte.getTypeMirror();
+        }
+        name = typeSimplifier.simplify(requestInterceptor);
+      }
+      return name;
     }
 
     private String buildConverter(ExecutableElement method) {
@@ -497,6 +517,22 @@ public class RetrofitProcessor extends AbstractProcessor {
 
     public boolean buildIsAuthenticated(ExecutableElement method) {
       return method.getAnnotation(Retrofit.Authenticated.class) != null;
+    }
+
+    public boolean buildIsSingletonRequestInterceptor(ExecutableElement method) {
+      javax.inject.Singleton singleton = null;
+      Retrofit.RequestInterceptor requestInterceptorAnnotation = method.getAnnotation(Retrofit.RequestInterceptor.class);
+      if (requestInterceptorAnnotation != null) {
+        TypeMirror requestInterceptor = null;
+        try {
+          requestInterceptor = getTypeMirror(processingEnv, requestInterceptorAnnotation.value());
+        } catch (MirroredTypeException mte) {
+          // http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
+          requestInterceptor = mte.getTypeMirror();
+        }
+        singleton = ((DeclaredType) requestInterceptor).getAnnotation(javax.inject.Singleton.class);
+      }
+      return singleton != null;
     }
 
     public String buildBody(ExecutableElement method) {
@@ -888,6 +924,10 @@ public class RetrofitProcessor extends AbstractProcessor {
       return errorHandler;
     }
 
+    public String getRequestInterceptor() {
+      return requestInterceptor;
+    }
+
     public String getLogLevel() {
       return logLevel;
     }
@@ -918,6 +958,10 @@ public class RetrofitProcessor extends AbstractProcessor {
 
     public boolean isAuthenticated() {
       return isAuthenticated;
+    }
+
+    public boolean isSingletonRequestInterceptor() {
+      return isSingletonRequestInterceptor;
     }
 
     public List<String> getAnnotations() {

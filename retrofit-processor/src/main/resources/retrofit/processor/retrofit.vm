@@ -55,6 +55,8 @@ import retrofit.client.Header;
 import retrofit.RestAdapter.LogLevel;
 import com.squareup.okhttp.HttpUrl;
 import retrofit.RequestInterceptor;
+import java.util.Map;
+import java.util.HashMap;
 
 import rx.schedulers.*;
 
@@ -72,9 +74,9 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     retrofit.RestAdapter.LogLevel logLevel;
     retrofit.RequestInterceptor requestInterceptor = retrofit.RequestInterceptor.NONE;
     retrofit.ErrorHandler errorHandler = retrofit.ErrorHandler.DEFAULT;
-
     retrofit.http.Retrofit.RequestAuthenticator requestAuthenticator;
     Object context;
+    Map<Class<? extends retrofit.RequestInterceptor>, retrofit.RequestInterceptor> requestInterceptors = new HashMap<>();
 
 ## Constructor
 
@@ -303,6 +305,36 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
                 System.out.println("retrofit: requestInterceptor");
                 SimpleRequestFacade requestFacade = new SimpleRequestFacade(request);
                 requestInterceptor.intercept(requestFacade);
+                return requestFacade.request();
+            }
+        });
+
+    #end
+
+    #if ($p.requestInterceptor != "")
+        #if (!$p.singletonRequestInterceptor)
+
+        retrofit.RequestInterceptor myRequestInterceptor = getRequestInterceptor(${p.requestInterceptor}.class);
+        if (myRequestInterceptor == null) {
+            myRequestInterceptor = putRequestInterceptor(${p.requestInterceptor}.class, new ${p.requestInterceptor}());
+        }
+
+        #else
+
+        retrofit.RequestInterceptor myRequestInterceptor = new ${p.requestInterceptor}();
+
+        #end
+
+        final retrofit.RequestInterceptor finalRequestInterceptor = myRequestInterceptor;
+        requestObs = requestObs.map(new Func1<Request, Request>() {
+            @Override public Request call(Request request) {
+                System.out.println("retrofit: myRequestInterceptor");
+                SimpleRequestFacade requestFacade = new SimpleRequestFacade(request);
+                if (finalRequestInterceptor instanceof retrofit.http.Retrofit.SimpleRequestInterceptor) {
+                    ((retrofit.http.Retrofit.SimpleRequestInterceptor) finalRequestInterceptor).intercept(context, requestFacade);
+                } else {
+                    finalRequestInterceptor.intercept(requestFacade);
+                }
                 return requestFacade.request();
             }
         });
@@ -872,4 +904,12 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     log.log("---- END ERROR");
   }
   */
+
+  private synchronized retrofit.RequestInterceptor putRequestInterceptor(Class<? extends retrofit.RequestInterceptor> clazz, retrofit.RequestInterceptor interceptor) {
+      return requestInterceptors.put(clazz, interceptor);
+  }
+
+  private synchronized retrofit.RequestInterceptor getRequestInterceptor(Class<? extends retrofit.RequestInterceptor> clazz) {
+      return requestInterceptors.get(clazz);
+  }
 }

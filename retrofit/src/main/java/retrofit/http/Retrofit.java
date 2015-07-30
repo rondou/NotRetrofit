@@ -111,6 +111,7 @@ public @interface Retrofit {
   @Retention(RUNTIME)
   @Target({TYPE, METHOD})
   public @interface RequestInterceptor {
+      //Class<? extends retrofit.RequestInterceptor>[] value() default retrofit.RequestInterceptor.class;
       Class<? extends retrofit.RequestInterceptor> value() default retrofit.RequestInterceptor.class;
   }
 
@@ -650,16 +651,26 @@ public @interface Retrofit {
   @Retention(RUNTIME)
   @Target({METHOD, TYPE})
   public @interface Authenticated {
+    //Class<? extends RequestAuthenticator>[] value() default RequestAuthenticator.class;
     Class<? extends RequestAuthenticator> value() default RequestAuthenticator.class;
   }
 
   @Retention(RUNTIME)
   @Target({METHOD, TYPE})
   public @interface Authenticator {
+    //Class<? extends RequestAuthenticator>[] value() default RequestAuthenticator.class;
     Class<? extends RequestAuthenticator> value() default RequestAuthenticator.class;
   }
 
   public interface RequestAuthenticator extends retrofit.RequestInterceptor {
-      String authorize(Object context, Collection<String> permissions);
+    String authorize(Object context, Collection<String> permissions);
+  }
+
+  public class SimpleRequestInterceptor implements retrofit.RequestInterceptor {
+    @Override public void intercept(retrofit.RequestInterceptor.RequestFacade request) {
+    }
+    public void intercept(Object context, retrofit.RequestInterceptor.RequestFacade request) {
+      intercept(request);
+    }
   }
 }
