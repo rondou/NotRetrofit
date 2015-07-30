@@ -75,6 +75,7 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     retrofit.RequestInterceptor requestInterceptor = retrofit.RequestInterceptor.NONE;
     retrofit.ErrorHandler errorHandler = retrofit.ErrorHandler.DEFAULT;
     retrofit.http.Retrofit.RequestAuthenticator requestAuthenticator;
+    // FIXME context is tricky
     Object context;
     Map<Class<? extends retrofit.RequestInterceptor>, retrofit.RequestInterceptor> requestInterceptors = new HashMap<>();
 
@@ -85,6 +86,7 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     }
 
     public $subclass(Object object) {
+        // FIXME context is tricky
         this.context = object;
         client = new OkHttpClient();
 
@@ -331,6 +333,7 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
                 System.out.println("retrofit: myRequestInterceptor");
                 SimpleRequestFacade requestFacade = new SimpleRequestFacade(request);
                 if (finalRequestInterceptor instanceof retrofit.http.Retrofit.SimpleRequestInterceptor) {
+                    // FIXME context is tricky
                     ((retrofit.http.Retrofit.SimpleRequestInterceptor) finalRequestInterceptor).intercept(context, requestFacade);
                 } else {
                     finalRequestInterceptor.intercept(requestFacade);
@@ -355,6 +358,7 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
         #end
 
                 SimpleRequestFacade requestAuthenticatorFacade = new SimpleRequestFacade(request);
+                // FIXME context is tricky
                 requestAuthenticator.authorize(context, permissions);
                 requestAuthenticator.intercept(requestAuthenticatorFacade);
                 return requestAuthenticatorFacade.request();

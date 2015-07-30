@@ -530,7 +530,10 @@ public class RetrofitProcessor extends AbstractProcessor {
           // http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
           requestInterceptor = mte.getTypeMirror();
         }
-        singleton = ((DeclaredType) requestInterceptor).getAnnotation(javax.inject.Singleton.class);
+
+        Types typeUtils = processingEnv.getTypeUtils();
+        TypeElement requestInterceptorType = (TypeElement) typeUtils.asElement(requestInterceptor);
+        singleton = requestInterceptorType.getAnnotation(javax.inject.Singleton.class);
       }
       return singleton != null;
     }

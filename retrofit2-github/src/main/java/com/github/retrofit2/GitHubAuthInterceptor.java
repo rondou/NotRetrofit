@@ -13,84 +13,28 @@
  */
 package com.github.retrofit2;
 
-import retrofit.RequestInterceptor;
-import retrofit.http.Retrofit.RequestAuthenticator;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import android.content.Context;
-import android.text.TextUtils;
-import retrofit.RequestInterceptor.RequestFacade;
-import android.accounts.AccountManager;
-import android.accounts.Account;
-import android.accounts.AccountManagerFuture;
-import android.app.Activity;
-import android.os.Bundle;
-import rx.Observable;
-import rx.functions.*;
 import javax.inject.Singleton;
+import retrofit.RequestInterceptor.RequestFacade;
+import retrofit.android.AuthenticationInterceptor;
 
 @Singleton
-public class GitHubAuthInterceptor extends retrofit.http.Retrofit.SimpleRequestInterceptor {
-    // TODO persistents
-    String token;
+public class GitHubAuthInterceptor extends AuthenticationInterceptor {
 
     @Override
-    public void intercept(Object context, RequestFacade request) {
-        if (token == null) {
-            token = getAuthToken((Activity) context, Collections.<String>emptyList());
-        }
+    public String accountType() {
+        //return context().getString(R.string.account_type);
+        return "com.github";
+    }
+
+    @Override
+    public String authTokenType() {
+        //return context().getString(R.string.auth_token_type);
+        return "com.github";
+    }
+
+    @Override
+    public void intercept(String token, RequestFacade request) {
         if (token != null) request.addHeader("Authorization", "Bearer " + token);
     }
 
-    public String getAuthToken(Activity activity, Collection<String> permissions) {
-        System.out.println("retrogithub: getAuthToken");
-        AccountManager accountManager = AccountManager.get(activity);
-        String accountType = "com.github";
-        //String authTokenType = TextUtils.join(",", permissions);
-        String authTokenType = accountType;
-        Account account = getAccount(accountManager, accountType);
-        System.out.println("retrogithub: account: " + account);
-        AccountManagerFuture<Bundle> bundleTask = null;
-        if (account == null) {
-            System.out.println("retrogithub: addAccount");
-            //bundleTask = accountManager.addAccount(accountType, authTokenType, permissions.toArray(new String[permissions.size()]), null, activity, null, null);
-            bundleTask = accountManager.addAccount(accountType, authTokenType, null, null, activity, null, null);
-        } else {
-            System.out.println("retrogithub: getAuthToken");
-            bundleTask = accountManager.getAuthToken(account, authTokenType, null, activity, null, null);
-        }
-
-        if (bundleTask == null) {
-            System.out.println("retrogithub: bundleTask: " + bundleTask);
-            return null;
-        }
-
-        final AccountManagerFuture<Bundle> finalBundleTask = bundleTask;
-        Bundle tokenBundle = null;
-        try {
-            System.out.println("retrogithub: tokenBundle");
-            tokenBundle = finalBundleTask.getResult();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("retrogithub: tokenBundle: " + tokenBundle);
-        if (tokenBundle == null) return null;
-
-        System.out.println("retrogithub: AccountManager.KEY_AUTHTOKEN");
-        return tokenBundle.getString(AccountManager.KEY_AUTHTOKEN);
-    }
-
-    public Account getAccount(AccountManager accountManager, String accountType) {
-        System.out.println("retrogithub: getAccount");
-        Account[] accounts = accountManager.getAccountsByType(accountType);
-        if (accounts.length > 0) return accounts[0];
-        return null; // not found
-    }
-
-    public String getToken() {
-        return token;
-    }
 }
