@@ -1,3 +1,5 @@
+ext.artifactId = 'retrofit-processor'
+
 apply plugin: 'java'
 apply from: 'deploy.gradle'
 

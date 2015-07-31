@@ -1,3 +1,5 @@
+ext.artifactId = 'retrofit-android'
+
 buildscript {
     repositories {
         jcenter()
@@ -13,6 +15,7 @@ repositories {
 }
 
 apply plugin: 'com.android.library'
+apply from: 'deploy.gradle'
 
 android {
     compileSdkVersion 22
