@@ -110,7 +110,7 @@ An object can be specified for use as an HTTP request body with the `@Body` anno
 
 ```java
 @POST("/users/new")
-abstract Observable<User> createUser(@Body User user> cb);
+abstract Observable<User> createUser(@Body User user);
 ```
 
 The object will also be converted using the converter.
