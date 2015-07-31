@@ -68,6 +68,21 @@ public abstract class GitHub {
         });
     }
 
+    @GET("/repos/{owner}/{repo}/contributors")
+    public abstract Observable<List<Contributor>> contributorListWithoutAuth(
+            @Path("owner") String owner,
+            @Path("repo") String repo);
+
+    public Observable<Contributor> contributorsWithoutAuth(
+            String owner,
+            String repo) {
+        return contributorListWithoutAuth(owner, repo).flatMap(new Func1<List<Contributor>, Observable<Contributor>>() {
+            @Override public Observable<Contributor> call(List<Contributor> list) {
+                return Observable.from(list);
+            }
+        });
+    }
+
     @GET("https://api.github.com/repos/{owner}/{repo}/contributors")
     public abstract Observable<List<Contributor>> contributorListWithoutBaseUrl(
             @Path("owner") String owner,
@@ -237,7 +252,7 @@ public abstract class GitHub {
     public Observable<Contributor> contributorsWithDateGson(
             String owner,
             String repo) {
-        return contributorList(owner, repo).flatMap(new Func1<List<Contributor>, Observable<Contributor>>() {
+        return contributorListWithoutAuth(owner, repo).flatMap(new Func1<List<Contributor>, Observable<Contributor>>() {
             @Override public Observable<Contributor> call(List<Contributor> list) {
                 return Observable.from(list);
             }

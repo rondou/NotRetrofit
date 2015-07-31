@@ -42,27 +42,27 @@ public class MainTest {
     @Test
     public void testGetWithBaseUrl() {
         GitHub github = GitHub.create();
-        List<String> contributors = github.contributors("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
+        List<String> contributorsWithoutAuth = github.contributorsWithoutAuth("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
             @Override public String call(Contributor contributor) {
                 System.out.println(contributor.login);
                 return contributor.login;
             }
         }).toList().toBlocking().single();
-        assertTrue(contributors.contains("JakeWharton"));
-        assertTrue(contributors.size() > 1);
+        assertTrue(contributorsWithoutAuth.contains("JakeWharton"));
+        assertTrue(contributorsWithoutAuth.size() > 1);
     }
 
     @Test
     public void testGetWithoutBaseUrl() {
         GitHub github = GitHub.create();
-        List<String> contributors = github.contributorsWithoutBaseUrl("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
+        List<String> contributorsWithoutAuth = github.contributorsWithoutBaseUrl("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
             @Override public String call(Contributor contributor) {
                 System.out.println(contributor.login);
                 return contributor.login;
             }
         }).toList().toBlocking().single();
-        assertTrue(contributors.contains("JakeWharton"));
-        assertTrue(contributors.size() > 1);
+        assertTrue(contributorsWithoutAuth.contains("JakeWharton"));
+        assertTrue(contributorsWithoutAuth.size() > 1);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class MainTest {
     @Test
     public void testStar() {
         GitHub github = GitHub.create();
-        List<String> contributors = github.star("YOUR_TOKEN_HERE", "yongjhih", "retrofit").map(new Func1<Contributor, String>() {
+        List<String> contributorsWithoutAuth = github.star("YOUR_TOKEN_HERE", "yongjhih", "retrofit").map(new Func1<Contributor, String>() {
             @Override public String call(Contributor contributor) {
                 System.out.println(contributor.login);
                 return contributor.login;
@@ -162,7 +162,7 @@ public class MainTest {
     @Test
     public void testUnstar() {
         GitHub github = GitHub.create();
-        List<String> contributors = github.unstar("YOUR_TOKEN_HERE", "yongjhih", "retrofit").map(new Func1<Contributor, String>() {
+        List<String> contributorsWithoutAuth = github.unstar("YOUR_TOKEN_HERE", "yongjhih", "retrofit").map(new Func1<Contributor, String>() {
             @Override public String call(Contributor contributor) {
                 System.out.println(contributor.login);
                 return contributor.login;
@@ -307,27 +307,54 @@ public class MainTest {
     @Test
     public void testMethodGson() {
         GitHub github = GitHub.create();
-        List<String> contributors = github.contributorsWithGson("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
+        List<String> contributorsWithoutAuth = github.contributorsWithGson("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
             @Override public String call(Contributor contributor) {
                 System.out.println(contributor.login);
                 return contributor.login;
             }
         }).toList().toBlocking().single();
-        assertTrue(contributors.contains("JakeWharton"));
-        assertTrue(contributors.size() > 1);
+        assertTrue(contributorsWithoutAuth.contains("JakeWharton"));
+        assertTrue(contributorsWithoutAuth.size() > 1);
     }
 
     @Test
     public void testMethodDateGson() {
         GitHub github = GitHub.create();
-        List<String> contributors = github.contributorsWithDateGson("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
+        List<String> contributorsWithoutAuth = github.contributorsWithDateGson("yongjhih", "retrofit").map(new Func1<Contributor, String>() {
             @Override public String call(Contributor contributor) {
                 System.out.println(contributor.login);
                 return contributor.login;
             }
         }).toList().toBlocking().single();
-        assertTrue(contributors.contains("JakeWharton"));
-        assertTrue(contributors.size() > 1);
+        assertTrue(contributorsWithoutAuth.contains("JakeWharton"));
+        assertTrue(contributorsWithoutAuth.size() > 1);
     }
 
+    @Test
+    public void testAndroidAuthenticationRequestInterceptor() {
+    }
+    @Test
+    public void testGlobalHeaders() {
+    }
+    @Test
+    public void testRetryHeaders() {
+    }
+    @Test
+    public void testRequestInterceptor() {
+    }
+    @Test
+    public void testRequestInterceptorOnMethod() {
+    }
+    @Test
+    public void testErrorHandler() {
+    }
+    @Test
+    public void testErrorHandlerOnMethod() {
+    }
+    @Test
+    public void testLogLevel() {
+    }
+    @Test
+    public void testConverterOnMethod() {
+    }
 }
