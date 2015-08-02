@@ -495,6 +495,7 @@ abstract class GitHub {
     public abstract Builder headers(String... headers);
     public abstract Builder logLevel(LogLevel logLevel);
     public abstract Builder context(Class type, Object context);
+    //public abstract Builder context(Class<T> type, T context);
     public GitHub build();
   }
 
