@@ -494,6 +494,7 @@ abstract class GitHub {
     public abstract Builder errorHandler(ErrorHandler errorHandler);
     public abstract Builder headers(String... headers);
     public abstract Builder logLevel(LogLevel logLevel);
+    public abstract Builder context(Class type, Object context);
     public GitHub build();
   }
 
