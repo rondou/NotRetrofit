@@ -489,6 +489,7 @@ abstract class GitHub {
 
   @Builder
   public abstract static class Builder {
+    public abstract Builder converter(Converter converter);
     public abstract Builder requestInterceptor(RequestInterceptor requestInterceptor);
     public abstract Builder errorHandler(ErrorHandler errorHandler);
     public abstract Builder headers(String... headers);
