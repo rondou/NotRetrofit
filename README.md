@@ -489,10 +489,12 @@ abstract class GitHub {
 
   @Builder
   public abstract static class Builder {
+    public abstract Builder baseUrl(String baseUrl);
     public abstract Builder converter(Converter converter);
     public abstract Builder requestInterceptor(RequestInterceptor requestInterceptor);
     public abstract Builder errorHandler(ErrorHandler errorHandler);
     public abstract Builder headers(String... headers);
+    public abstract Builder retryHeaders(String... headers);
     public abstract Builder logLevel(LogLevel logLevel);
     public abstract Builder context(Class type, Object context);
     //public abstract Builder context(Class<T> type, T context);
