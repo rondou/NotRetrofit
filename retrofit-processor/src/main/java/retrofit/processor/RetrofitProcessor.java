@@ -666,6 +666,7 @@ public class RetrofitProcessor extends AbstractProcessor {
     // "/" + userIdA + "/friends/" + userIdB + ""
     public String buildPath(ExecutableElement method) {
       String fullPath = buildRawPath(method);
+      if (fullPath == null) return null;
 
       List<? extends VariableElement> parameters = method.getParameters();
       for (VariableElement parameter : parameters) {
@@ -716,6 +717,8 @@ public class RetrofitProcessor extends AbstractProcessor {
       Map<String, String> map = new HashMap<String, String>();
 
       String fullPath = buildRawPath(method);
+      if (fullPath == null) return map;
+
       if (fullPath.indexOf("?") != -1) {
         fullPath = fullPath.replaceAll("^.*\\?", "");
         String[] queries = fullPath.split("&");
@@ -1117,7 +1120,7 @@ public class RetrofitProcessor extends AbstractProcessor {
       errorReporter.abortWithError(
           "@" + Retrofit.class.getName() + " only applies to classes", type);
     }
-    if (ancestorIsRetrofit(type)) {
+    if (false && ancestorIsRetrofit(type)) {
       errorReporter.abortWithError("One @Retrofit class may not extend another", type);
     }
     if (implementsAnnotation(type)) {
@@ -1158,14 +1161,18 @@ public class RetrofitProcessor extends AbstractProcessor {
     BuilderSpec builderSpec = new BuilderSpec(type, processingEnv, errorReporter);
     Optional<BuilderSpec.Builder> builder = builderSpec.getBuilder();
     ImmutableSet<ExecutableElement> toBuilderMethods;
+    ImmutableList<ExecutableElement> builderSetters;
     if (builder.isPresent()) {
       types.add(getTypeMirror(BitSet.class));
       toBuilderMethods = builder.get().toBuilderMethods(typeUtils, methodsToImplement);
+      builderSetters = builder.get().getSetters();
     } else {
       toBuilderMethods = ImmutableSet.of();
+      builderSetters = ImmutableList.of();
     }
     vars.toBuilderMethods =
         FluentIterable.from(toBuilderMethods).transform(SimpleNameFunction.INSTANCE).toList();
+
     Set<ExecutableElement> propertyMethods = Sets.difference(methodsToImplement, toBuilderMethods);
     String pkg = TypeSimplifier.packageNameOf(type);
     TypeSimplifier typeSimplifier = new TypeSimplifier(typeUtils, pkg, types, type.asType());
@@ -1280,6 +1287,16 @@ public class RetrofitProcessor extends AbstractProcessor {
       String authenticated = typeSimplifier.simplify(authenticatedType);
       vars.authenticated = authenticated != null && !"".equals(authenticated);
     }
+
+    List<Property> builderProps = new ArrayList<Property>();
+    for (ExecutableElement method : builderSetters) {
+      List<? extends VariableElement> parameters = method.getParameters();
+      String propertyType = typeSimplifier.simplify(parameters.get(0).asType());
+      String propertyName = method.getSimpleName().toString();
+      String identifier = method.getSimpleName().toString();
+      builderProps.add(new Property(propertyName, identifier, method, propertyType, typeSimplifier, processingEnv));
+    }
+    vars.builderProps = builderProps;
 
     TypeElement parcelable = processingEnv.getElementUtils().getTypeElement("android.os.Parcelable");
     vars.parcelable = parcelable != null

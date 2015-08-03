@@ -155,6 +155,10 @@ class BuilderSpec {
       this.validateMethod = validateMethod;
     }
 
+    public ImmutableList<ExecutableElement> getSetters() {
+        return this.setters;
+    }
+
     ExecutableElement buildMethod() {
       return buildMethod;
     }
@@ -191,18 +195,11 @@ class BuilderSpec {
           type = getterMap.get(name);
           map = prefixMap;
         }
-        if (type == null) {
-          errorReporter.reportError(
-              "Method does not correspond to a property of " + autoValueClass, setter);
-          ok = false;
-        } else {
+        if (type != null) {
           VariableElement parameter = Iterables.getOnlyElement(setter.getParameters());
           if (TYPE_EQUIVALENCE.equivalent(type, parameter.asType())) {
             getterMap.remove(name);
             map.put(name, setter);
-          } else {
-            errorReporter.reportError("Parameter type should be " + type, parameter);
-            ok = false;
           }
         }
       }
@@ -215,22 +212,6 @@ class BuilderSpec {
         errorReporter.reportError(
             "If any setter methods use the setFoo convention then all must",
             noPrefixMap.values().iterator().next());
-        return null;
-      }
-
-      // If there are any properties left in the map then we didn't see setters for them. Report
-      // an error for each one separately.
-      if (!getterMap.isEmpty()) {
-        for (Map.Entry<String, TypeMirror> entry : getterMap.entrySet()) {
-          String setterName = prefixing ? prefixWithSet(entry.getKey()) : entry.getKey();
-          String error = String.format(
-              "Expected a method with this signature: %s%s %s(%s)",
-              builderTypeElement,
-              TypeSimplifier.actualTypeParametersString(builderTypeElement),
-              setterName,
-              entry.getValue());
-          errorReporter.reportError(error, builderTypeElement);
-        }
         return null;
       }
 

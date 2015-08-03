@@ -55,8 +55,12 @@ import retrofit.client.Header;
 import retrofit.RestAdapter.LogLevel;
 import com.squareup.okhttp.HttpUrl;
 import retrofit.RequestInterceptor;
+//import retrofit.converter.Converter;
+//import retrofit.ErrorHandler;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import com.squareup.okhttp.Cache;
 
 import rx.schedulers.*;
 
@@ -66,11 +70,12 @@ import rx.schedulers.*;
 ${gwtCompatibleAnnotation}
 public final class $subclass$formalTypes extends $origClass$actualTypes {
 
-    final OkHttpClient client;
     public static final String _MIME_APP_JSON = "applications/json";
     public static final String _CHARSET_UTF8 = "charset=utf-8";
     public static final String _MIME_APP_JSON_CHARSET_UTF8 = _MIME_APP_JSON + "; " + _CHARSET_UTF8;
-    Converter converter;
+
+    OkHttpClient okHttpClient;
+    retrofit.converter.Converter converter;
     retrofit.RestAdapter.LogLevel logLevel;
     retrofit.RequestInterceptor requestInterceptor = retrofit.RequestInterceptor.NONE;
     retrofit.ErrorHandler errorHandler = retrofit.ErrorHandler.DEFAULT;
@@ -78,65 +83,105 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     // FIXME context is tricky
     Object context;
     Map<Class<? extends retrofit.RequestInterceptor>, retrofit.RequestInterceptor> requestInterceptors = new HashMap<>();
+    String[] retryHeaders;
+    String[] headers;
+    Cache cache;
+    String baseUrl;
 
 ## Constructor
 
+#if ($builderTypeName != "")
     public $subclass() {
-        this(null);
+      this(
+#foreach ($p in $builderProps)
+
+      null #if ($foreach.hasNext) , #end
+#end );
     }
+#end
 
-    public $subclass(Object object) {
-        // FIXME context is tricky
-        this.context = object;
-        client = new OkHttpClient();
+    public ##
+    $subclass(
+#foreach ($p in $builderProps)
 
-        try {
+        $p.type $p #if ($foreach.hasNext) , #end
+#end ) {
+#foreach ($p in $builderProps)
+
+        this.$p = $p;
+
+#end
+
+        if (this.converter == null) {
+
+            try {
 
 #if ($converter != "")
     #if ($gsonConverter != "")
 
-            this.converter = new ${converter}(new com.google.gson.Gson());
+                this.converter = new ${converter}(new com.google.gson.Gson());
 
     #else
 
-            this.converter = new ${converter}();
+                this.converter = new ${converter}();
 
     #end
 #else
 
-            /**
-             * Parse JsonArray
-             * gson.fromJson(jsonString, Wrapper[].class);
-             * mapper.readValue(jsonString, typeFactory.constructCollectionType(List.class, SomeClass.class));
-             */
+                /**
+                 * Parse JsonArray
+                 * gson.fromJson(jsonString, Wrapper[].class);
+                 * mapper.readValue(jsonString, typeFactory.constructCollectionType(List.class, SomeClass.class));
+                 */
 
-            this.converter = new retrofit.converter.LoganSquareConverter();
+                this.converter = new retrofit.converter.LoganSquareConverter();
 
 #end
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        this.logLevel = retrofit.RestAdapter.LogLevel.$logLevel;
+
+        if (this.logLevel == null) {
+            this.logLevel = retrofit.RestAdapter.LogLevel.$logLevel;
+        }
 
 #if ($requestInterceptor != "")
 
-        this.requestInterceptor = new $requestInterceptor();
+        if (this.requestInterceptor == null) {
+            this.requestInterceptor = new $requestInterceptor();
+        }
 
 #end
 
 #if ($errorHandler != "")
 
-        this.errorHandler = new $errorHandler();
+        if (this.errorHandler == null) {
+            this.errorHandler = new $errorHandler();
+        }
 
 #end
 
 #if ($authenticator != "")
 
-        this.requestAuthenticator = new $authenticator();
+        if (this.requestAuthenticator == null) {
+            this.requestAuthenticator = new $authenticator();
+        }
 
 #end
+
+        if (okHttpClient == null) {
+            okHttpClient = new OkHttpClient();
+        }
+
+        okHttpClient.setConnectTimeout(15, TimeUnit.SECONDS);
+        okHttpClient.setReadTimeout(20, TimeUnit.SECONDS);
+
+        if (cache != null) {
+            okHttpClient.setCache(cache);
+        }
 
     }
 
@@ -177,10 +222,13 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
         }
 
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(_url).newBuilder();
+        String value;
 
     #foreach ($query in $p.queries.entrySet())
 
-        httpUrlBuilder.addQueryParameter("${query.key}", $query.value);
+        value = String.valueOf($query.value);
+        if (value != null && !"null".equals(value)) httpUrlBuilder.addQueryParameter("${query.key}", value);
+        value = null;
 
     #end
 
@@ -300,18 +348,19 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
         System.out.println("retrofit: ${p.getter}");
 
-    #if ($requestInterceptor != "")
-
         requestObs = requestObs.map(new Func1<Request, Request>() {
             @Override public Request call(Request request) {
                 System.out.println("retrofit: requestInterceptor");
                 SimpleRequestFacade requestFacade = new SimpleRequestFacade(request);
-                requestInterceptor.intercept(requestFacade);
+                if (requestInterceptor instanceof retrofit.http.Retrofit.SimpleRequestInterceptor) {
+                    // FIXME context is tricky
+                    ((retrofit.http.Retrofit.SimpleRequestInterceptor) requestInterceptor).intercept(context, requestFacade);
+                } else {
+                    requestInterceptor.intercept(requestFacade);
+                }
                 return requestFacade.request();
             }
         });
-
-    #end
 
     #if ($p.requestInterceptor != "")
         #if (!$p.singletonRequestInterceptor)
@@ -389,14 +438,16 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
             @Override public Observable<com.squareup.okhttp.Response> call(Request request) {
                 System.out.println("retrofit: responseCachedObs");
 
-                return Observable.create(new OnSubscribeResponse(client, request));
+                return Observable.create(new OnSubscribeResponse(okHttpClient, request));
             }
 
     #if (!$retryHeaders.isEmpty())
 
         }).onErrorResumeNext(new Func1<Throwable, Observable<com.squareup.okhttp.Response>>() {
             @Override public Observable<com.squareup.okhttp.Response> call(Throwable e) {
+                System.out.println("retrofit: exception: " + e);
                 if (e instanceof RequestException) {
+                    System.out.println("retrofit: RequestException: " + e);
                     RequestException requestException = (RequestException) e;
                     Request.Builder reqBuilder = requestException.request().newBuilder();
 
@@ -406,8 +457,20 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
         #end
 
-                    return Observable.create(new OnSubscribeResponse(client, reqBuilder.build()));
+                    Request request = reqBuilder.build();
+                    System.out.println("retrofit: retry: log");
+                    if (logLevel.log()) {
+                        // Log the request data.
+                        try {
+                            request = logAndReplaceRequest("HTTP", request, finalBodyString);
+                        } catch (IOException e2) {
+                            throw retrofit.RetrofitError.unexpectedError(request.urlString(), e2);
+                        }
+                    }
+
+                    return Observable.create(new OnSubscribeResponse(okHttpClient, request));
                 }
+                System.out.println("retrofit: !RequestException: " + e);
                 return Observable.error(e);
             }
 
@@ -646,18 +709,20 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
     // TODO onUnSubscribe to call.cancel();
     public static class OnSubscribeResponse implements Observable.OnSubscribe<com.squareup.okhttp.Response> {
         final Request request;
-        final OkHttpClient client;
+        final OkHttpClient okHttpClient;
 
-        public OnSubscribeResponse(OkHttpClient client, Request request) {
+        public OnSubscribeResponse(OkHttpClient okHttpClient, Request request) {
             this.request = request;
-            this.client = client;
+            this.okHttpClient = okHttpClient;
         }
 
         @Override
         public void call(final Subscriber<? super com.squareup.okhttp.Response> sub) {
             try {
-                client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
+                okHttpClient.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
                     @Override public void onFailure(Request r, IOException e) {
+                        System.out.println("retrofit: Request: " + r);
+                        System.out.println("retrofit: IOException: " + e);
                         sub.onError(new RequestException(r, e));
                     }
                     @Override public void onResponse(com.squareup.okhttp.Response response) {
@@ -916,4 +981,80 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
   private synchronized retrofit.RequestInterceptor getRequestInterceptor(Class<? extends retrofit.RequestInterceptor> clazz) {
       return requestInterceptors.get(clazz);
   }
+
+
+#if ($builderTypeName != "")
+
+  #foreach ($m in $toBuilderMethods)
+
+  @Override
+  public ${builderTypeName}${builderActualTypes} ${m}() {
+    return new Builder${builderActualTypes}(this);
+  }
+
+  #end
+
+  static final class Builder${builderFormalTypes} ##
+  #if ($builderIsInterface) implements #else extends #end
+      ${builderTypeName}${builderActualTypes} {
+
+    private final $bitSet set$ = new ${bitSet}();
+
+    #foreach ($p in $builderProps)
+
+    private $p.type $p;
+
+    #end
+
+    Builder() {
+    }
+
+##    Builder(${origClass}${actualTypes} source) {
+##
+##      #foreach ($p in $builderProps)
+##
+##      ${p.name}(source.${p.getter}());
+##
+##      #end
+##
+##    }
+
+#foreach ($p in $builderProps)
+
+    @Override
+    public ${builderTypeName}${builderActualTypes} ${p.name}($p.type $p) {
+      #if ($p.kind == "ARRAY")
+
+      this.$p = ($p == null) ? null : ${p}.clone();
+
+      #else
+
+      this.$p = $p;
+
+      #end
+
+      return this;
+    }
+
+    #end
+
+    @Override
+    public ${origClass}${actualTypes} ${buildMethodName}() {
+      ${origClass}${actualTypes} result = new ${subclass}${actualTypes}(
+    #foreach ($p in $builderProps)
+
+          this.$p #if ($foreach.hasNext) , #end
+    #end );
+
+    #foreach ($v in $validators)
+
+      result.${v}();
+
+    #end
+
+      return result;
+    }
+  }
+#end
+
 }

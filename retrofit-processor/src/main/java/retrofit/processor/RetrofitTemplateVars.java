@@ -134,6 +134,8 @@ class RetrofitTemplateVars extends TemplateVars {
    */
   List<String> toBuilderMethods;
 
+  List<RetrofitProcessor.Property> builderProps;
+
   String baseUrl = "";
 
   Map<String, String> headers = Collections.emptyMap();
