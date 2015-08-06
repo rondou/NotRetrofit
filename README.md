@@ -535,6 +535,8 @@ abstract class GitHub {
 
 ## @HttpStack
 
+## @Trust
+
 ## Installation
 
 via jcenter:
