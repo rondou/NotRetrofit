@@ -525,6 +525,16 @@ abstract class GitHub {
 }
 ```
 
+## @Auth
+
+## @RetryPolicy
+
+## @BaseUrl
+
+## @Mock
+
+## @HttpStack
+
 ## Installation
 
 via jcenter:
