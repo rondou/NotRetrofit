@@ -296,6 +296,25 @@ public abstract class GitHub {
 
     // promise parameter
     public static GitHub create(Activity activity) {
-        return new Retrofit_GitHub(activity);
+        return builder().context(activity).build();
+    }
+
+    @Retrofit.Builder
+    public abstract static class Builder {
+        public abstract Builder baseUrl(String baseUrl);
+        public abstract Builder converter(retrofit.converter.Converter converter);
+        public abstract Builder requestInterceptor(retrofit.RequestInterceptor requestInterceptor);
+        public abstract Builder errorHandler(retrofit.ErrorHandler errorHandler);
+        public abstract Builder headers(String... headers);
+        public abstract Builder retryHeaders(String... headers);
+        public abstract Builder logLevel(retrofit.RestAdapter.LogLevel logLevel);
+        public abstract Builder context(Object context);
+        //public abstract Builder cache(Cache cache);
+        //public abstract Builder okHttpClient(OkHttpClient client);
+        public abstract GitHub build();
+    }
+
+    public static Builder builder() {
+        return new Retrofit_GitHub.Builder();
     }
 }
