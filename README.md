@@ -1,4 +1,4 @@
-# Retrofit 2
+# Retrofit 2 (Experiment)
 
 [![Download](https://api.bintray.com/packages/yongjhih/maven/retrofit/images/download.svg)](https://bintray.com/yongjhih/maven/retrofit/_latestVersion)
 [![JitPack](https://img.shields.io/github/tag/yongjhih/retrofit.svg?label=JitPack)](https://jitpack.io/#yongjhih/retrofit)
