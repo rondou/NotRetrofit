@@ -527,8 +527,6 @@ abstract class GitHub {
 
 ## @Auth
 
-## @RetryPolicy
-
 ## @BaseUrl
 
 ## @Mock
@@ -536,6 +534,27 @@ abstract class GitHub {
 ## @HttpStack
 
 ## @Trust
+
+## @Retry
+
+```java
+@Retry(3)
+abstract Observable<Repo> repos();
+```
+
+## @Timeout
+
+```java
+@Timeout(1000)
+abstract Observable<Repo> repos();
+```
+
+## @RetryPolicy
+
+```java
+@RetryPolicy(timeout = 1000, retry = 3, backoff = 1.3f)
+abstract Observable<Repo> repos();
+```
 
 ## Installation
 
