@@ -625,6 +625,8 @@ Github sample app:
 * jw/retrofit-two? https://github.com/JakeWharton/u2020/compare/jw/retrofit-two
 * square/jw/code-gen, 49407dbb19f48072ab5fce8a49f38606ce07bd27, 2013
 * https://github.com/square/retrofit/issues/297 (2.0 SPEC, 20150807 found)
+* https://speakerdeck.com/jakewharton/simple-http-with-retrofit-2-droidcon-nyc-2015
+
 ## Credit
 
 * Square, Inc.
