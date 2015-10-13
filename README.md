@@ -412,6 +412,22 @@ abstract class GitHub {
 }
 ```
 
+## Dynamic URL
+
+```java
+@Retrofit("https://api.github.com")
+public abstract class GitHub {
+  @GET("/repos/{owner}/{repo}/contributors")
+  public abstract Observable<List<Contributor>> contributorList(
+      @Path("owner") String owner,
+      @Path("repo") String repo);
+
+  @GET("{url}")
+  public abstract Observable<List<Contributor>> contributorListPaginate(@Path("url") String url);
+  //..
+}
+```
+
 ## Authentication for android
 
 ```java

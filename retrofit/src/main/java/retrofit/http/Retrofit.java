@@ -673,4 +673,15 @@ public @interface Retrofit {
       intercept(request);
     }
   }
+
+  /**
+   * Dynamic Url.
+   */
+  //@Documented
+  //@Target(PARAMETER)
+  //@Retention(RUNTIME)
+  //public @interface Url {
+  //  String value();
+  //}
+
 }
