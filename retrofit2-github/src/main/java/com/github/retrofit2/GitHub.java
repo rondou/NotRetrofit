@@ -50,6 +50,7 @@ import android.app.Activity;
 @LogLevel(retrofit.RestAdapter.LogLevel.FULL) // optional
 @RequestInterceptor(GitHubRequestInterceptor.class) // optional
 @ErrorHandler(GitHubErrorHandler.class) // optional
+@Retrofit.OkHttpClient(GitHubOkHttpClienter.class) // optional
 public abstract class GitHub {
     @GET("/repos/{owner}/{repo}/contributors")
     //@Authenticator(GitHubAuthenticator.class)

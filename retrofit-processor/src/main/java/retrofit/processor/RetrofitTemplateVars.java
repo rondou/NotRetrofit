@@ -147,6 +147,7 @@ class RetrofitTemplateVars extends TemplateVars {
   retrofit.RestAdapter.LogLevel logLevel = retrofit.RestAdapter.LogLevel.NONE;
 
   String requestInterceptor = "";
+  String okHttpClient = "";
 
   String authenticator = "";
   Boolean authenticated = false;

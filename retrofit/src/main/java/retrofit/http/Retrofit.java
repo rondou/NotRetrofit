@@ -662,6 +662,17 @@ public @interface Retrofit {
     Class<? extends RequestAuthenticator> value() default RequestAuthenticator.class;
   }
 
+  @Retention(RUNTIME)
+  @Target(TYPE)
+  public @interface OkHttpClient {
+    //Class<? extends RequestAuthenticator>[] value() default RequestAuthenticator.class;
+    Class<? extends OkHttpClienter> value() default OkHttpClienter.class;
+  }
+
+  public interface OkHttpClienter {
+    com.squareup.okhttp.OkHttpClient get();
+  }
+
   public interface RequestAuthenticator extends retrofit.RequestInterceptor {
     String authorize(Object context, Collection<String> permissions);
   }

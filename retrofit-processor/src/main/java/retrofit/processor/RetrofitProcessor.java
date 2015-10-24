@@ -1223,6 +1223,17 @@ public class RetrofitProcessor extends AbstractProcessor {
       vars.retryHeaders = retryHeaderMap;
     }
 
+    Retrofit.OkHttpClient okHttpClienterAnnotation = type.getAnnotation(Retrofit.OkHttpClient.class);
+    if (okHttpClienterAnnotation != null) {
+      TypeMirror okHttpClienter = null;
+      try {
+        okHttpClienter = getTypeMirror(okHttpClienterAnnotation.value());
+      } catch (MirroredTypeException mte) {
+        // http://blog.retep.org/2009/02/13/getting-class-values-from-annotations-in-an-annotationprocessor/
+        okHttpClienter = mte.getTypeMirror();
+      }
+      vars.okHttpClient = typeSimplifier.simplify(okHttpClienter);
+    }
     Retrofit.Converter converterAnnotation = type.getAnnotation(Retrofit.Converter.class);
     if (converterAnnotation != null) {
       TypeMirror converter = null;

@@ -573,6 +573,21 @@ abstract Observable<Repo> repos();
 abstract Observable<Repo> repos();
 ```
 
+## @OkHttpClient
+
+```java
+@OkHttpClient(AllTrustedOkHttpClienter.class)
+abstract class GitHub {
+  // ...
+}
+
+AllTrustedOkHttpClienter extends OkHttpClienter {
+  @Override OkHttpClient get() {
+    // ...
+    return okHttpClient;
+  }
+}
+```
 ## Installation
 
 via jcenter:

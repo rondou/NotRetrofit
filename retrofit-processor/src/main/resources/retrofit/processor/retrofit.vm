@@ -172,9 +172,17 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
 #end
 
+#if ($okHttpClient != "")
+
+        this.okHttpClient = new $okHttpClient().get();
+
+#else
+
         if (okHttpClient == null) {
             okHttpClient = new OkHttpClient();
         }
+
+#end
 
         okHttpClient.setConnectTimeout(15, TimeUnit.SECONDS);
         okHttpClient.setReadTimeout(20, TimeUnit.SECONDS);
