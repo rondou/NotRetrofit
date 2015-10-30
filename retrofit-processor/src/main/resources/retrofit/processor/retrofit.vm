@@ -356,6 +356,8 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
         System.out.println("retrofit: ${p.getter}");
 
+    #if ($p.requestInterceptor != "")
+
         requestObs = requestObs.map(new Func1<Request, Request>() {
             @Override public Request call(Request request) {
                 System.out.println("retrofit: requestInterceptor");
@@ -370,7 +372,6 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
             }
         });
 
-    #if ($p.requestInterceptor != "")
         #if (!$p.singletonRequestInterceptor)
 
         retrofit.RequestInterceptor myRequestInterceptor = getRequestInterceptor(${p.requestInterceptor}.class);
