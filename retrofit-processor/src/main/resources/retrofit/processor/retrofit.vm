@@ -276,6 +276,12 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
         requestBuilder.post(formBuilder.build());
 
+        #else
+
+        FormEncodingBuilder formBuilder = new FormEncodingBuilder();
+
+        requestBuilder.post(formBuilder.build());
+
         #end
     #elseif ($p.put)
         #if (!$p.parts.isEmpty())
