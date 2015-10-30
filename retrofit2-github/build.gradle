@@ -26,12 +26,12 @@ android {
 }
 
 dependencies {
-    //compile project(':retrofit')
-    //apt project(':retrofit-processor')
-    //compile project(':retrofit-android')
-    compile 'com.infstory:retrofit:2.0.2'
-    apt 'com.infstory:retrofit-processor:2.0.2'
-    compile 'com.infstory:retrofit-android:2.0.2'
+    compile project(':retrofit')
+    apt project(':retrofit-processor')
+    compile project(':retrofit-android')
+    //compile 'com.infstory:retrofit:2.0.2'
+    //apt 'com.infstory:retrofit-processor:2.0.2'
+    //compile 'com.infstory:retrofit-android:2.0.2'
 
     compile 'io.reactivex:rxjava:1.0.9'
     //compile 'io.reactivex:rxandroid:0.24.0'
