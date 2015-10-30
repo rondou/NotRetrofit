@@ -65,7 +65,7 @@ def getRepositoryPassword() {
 publish {
     userOrg = 'yongjhih'
     groupId = 'com.infstory'
-    artifactId = 'retrofit-processor'
+    artifactId = 'retrofit-android'
     //uploadName = ''
     publishVersion = '2.0.2'
     desc = 'Type-safe REST client for Android and Java'
