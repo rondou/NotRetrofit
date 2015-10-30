@@ -492,27 +492,27 @@ public class RetrofitProcessor extends AbstractProcessor {
 
     public boolean buildIsGet(ExecutableElement method) {
       // TODO duplicated routine
-      return method.getAnnotation(Retrofit.GET.class) != null;
+      return method.getAnnotation(Retrofit.GET.class) != null || method.getAnnotation(retrofit.http.GET.class) != null;
     }
 
     public boolean buildIsPost(ExecutableElement method) {
       // TODO duplicated routine
-      return method.getAnnotation(Retrofit.POST.class) != null;
+      return method.getAnnotation(Retrofit.POST.class) != null || method.getAnnotation(retrofit.http.POST.class) != null;
     }
 
     public boolean buildIsPut(ExecutableElement method) {
       // TODO duplicated routine
-      return method.getAnnotation(Retrofit.PUT.class) != null;
+      return method.getAnnotation(Retrofit.PUT.class) != null || method.getAnnotation(retrofit.http.PUT.class) != null;
     }
 
     public boolean buildIsDelete(ExecutableElement method) {
       // TODO duplicated routine
-      return method.getAnnotation(Retrofit.DELETE.class) != null;
+      return method.getAnnotation(Retrofit.DELETE.class) != null || method.getAnnotation(retrofit.http.DELETE.class) != null;
     }
 
     public boolean buildIsHead(ExecutableElement method) {
       // TODO duplicated routine
-      return method.getAnnotation(Retrofit.HEAD.class) != null;
+      return method.getAnnotation(Retrofit.HEAD.class) != null || method.getAnnotation(retrofit.http.HEAD.class) != null;
     }
 
     public boolean buildIsAuthenticated(ExecutableElement method) {
