@@ -1,7 +1,14 @@
-ext.artifactId = 'retrofit-processor'
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.3.4'
+    }
+}
 
 apply plugin: 'java'
-apply from: 'deploy.gradle'
 
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
@@ -33,6 +40,33 @@ dependencies {
 tasks.withType(Test) {
   testLogging {
     exceptionFormat "full"
-    events "passed", "skipped", "failed"
+    events "passed", "skipped", "failed", "standardOut", "standardError"
+    showStandardStreams = true
   }
+}
+
+apply plugin: 'maven'
+group = 'com.github.yongjhih'
+
+apply plugin: 'com.novoda.bintray-release'
+
+def getRepositoryUsername() {
+    return hasProperty('BINTRAY_USER') ? BINTRAY_USER : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('BINTRAY_KEY') ? BINTRAY_KEY : ""
+}
+
+publish {
+    userOrg = 'yongjhih'
+    groupId = 'com.infstory'
+    artifactId = 'retrofit-android'
+    //uploadName = ''
+    publishVersion = '2.0.2'
+    desc = 'Type-safe REST client for Android and Java'
+    website = 'https://github.com/yongjhih/NotRetrofit'
+    bintrayUser = getRepositoryUsername()
+    bintrayKey = getRepositoryPassword()
+    dryRun = false
 }
