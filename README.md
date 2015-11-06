@@ -598,9 +598,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.infstory:retrofit:2.0.3'
-    apt 'com.infstory:retrofit-processor:2.0.3'
-    compile 'com.infstory:retrofit-android:2.0.3'
+    compile 'com.infstory:retrofit:2.0.4'
+    apt 'com.infstory:retrofit-processor:2.0.4'
+    compile 'com.infstory:retrofit-android:2.0.4'
 
     compile 'com.bluelinelabs:logansquare:1.1.0'
     apt 'com.bluelinelabs:logansquare-compiler:1.1.0'
