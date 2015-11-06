@@ -148,6 +148,19 @@ public abstract class GitHub {
     @GET("/user")
     public abstract Observable<Contributor> getUserWithAuthorization(@Header("Authorization") String authorization);
 
+    @GET("/user")
+    public abstract Observable<Contributor> getUserWithAuthorization2(@Header("Authorization") String authorization);
+
+    @Headers({
+        "Accept: application/vnd.github.v3.full+json",
+        "User-Agent: Retrofit2"
+    })
+    @DELETE("/user")
+    public abstract Observable<Contributor> deleteUserWithAuthorization(@Header("Authorization") String authorization);
+
+    @DELETE("/user")
+    public abstract Observable<Contributor> deleteUserWithAuthorization2(@Header("Authorization") String authorization);
+
     @Headers({
         "Accept: application/vnd.github.v3.full+json",
         "User-Agent: Retrofit2"

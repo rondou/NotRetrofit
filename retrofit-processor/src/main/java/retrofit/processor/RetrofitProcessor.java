@@ -568,7 +568,7 @@ public class RetrofitProcessor extends AbstractProcessor {
 
     public Map<String, String> buildHeaders(ExecutableElement method) {
       Map<String, String> map = new HashMap<String, String>();
-      String[] headers;
+      String[] headers = {};
 
       Retrofit.Headers headersAnnotation = method.getAnnotation(Retrofit.Headers.class);
       retrofit.http.Headers headers1Annotation = method.getAnnotation(retrofit.http.Headers.class);
@@ -576,8 +576,6 @@ public class RetrofitProcessor extends AbstractProcessor {
         headers = headersAnnotation.value();
       } else if (headers1Annotation != null) {
         headers = headers1Annotation.value();
-      } else {
-        return Collections.emptyMap();
       }
 
       for (String header : headers) {
