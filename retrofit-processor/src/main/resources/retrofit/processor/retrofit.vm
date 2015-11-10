@@ -348,6 +348,19 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
         #else ## PUT/POST without Body/Field/Part
 
+## empty Body? or throw exception? or do nothing
+##        FormEncodingBuilder formBuilder = new FormEncodingBuilder();
+##
+##            #if ($p.post)
+##
+##        requestBuilder.post(formBuilder.build());
+##
+##            #elseif ($p.put)
+##
+##        requestBuilder.put(formBuilder.build());
+##
+##            #end
+
         #end
 
     #elseif ($p.delete)

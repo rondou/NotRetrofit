@@ -35,9 +35,9 @@ dependencies {
     //compile 'com.github.yongjhih.NotRetrofit:retrofit-android:-SNAPSHOT'
     //apt 'com.github.yongjhih.NotRetrofit:retrofit-processor:-SNAPSHOT'
     //compile 'com.github.yongjhih.NotRetrofit:retrofit:-SNAPSHOT' // optional
-    //compile 'com.github.yongjhih.NotRetrofit:retrofit:eb262c5264'
-    //apt 'com.github.yongjhih.NotRetrofit:retrofit-processor:eb262c5264'
-    //compile 'com.github.yongjhih.NotRetrofit:retrofit-android:eb262c5264' // optional
+    //compile 'com.github.yongjhih.NotRetrofit:retrofit:1cc4afe5e1'
+    //apt 'com.github.yongjhih.NotRetrofit:retrofit-processor:1cc4afe5e1'
+    //compile 'com.github.yongjhih.NotRetrofit:retrofit-android:1cc4afe5e1' // optional
 
     compile 'io.reactivex:rxjava:1.0.9'
     //compile 'io.reactivex:rxandroid:0.24.0'
