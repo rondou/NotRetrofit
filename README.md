@@ -598,8 +598,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.infstory:retrofit-android:2.0.4'
+    compile 'com.infstory:retrofit:2.0.4'
     apt 'com.infstory:retrofit-processor:2.0.4'
+    //compile 'com.infstory:retrofit-android:2.0.4' // optional, retrofit.android.AuthenticationInterceptor;
 
     compile 'com.bluelinelabs:logansquare:1.1.0'
     apt 'com.bluelinelabs:logansquare-compiler:1.1.0'
@@ -615,8 +616,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.yongjhih.NotRetrofit:retrofit-android:-SNAPSHOT'
+    compile 'com.github.yongjhih.NotRetrofit:retrofit:-SNAPSHOT'
     apt 'com.github.yongjhih.NotRetrofit:retrofit-processor:-SNAPSHOT'
+    //compile 'com.github.yongjhih.NotRetrofit:retrofit-android:-SNAPSHOT' // optional, retrofit.android.AuthenticationInterceptor;
 
     compile 'com.bluelinelabs:logansquare:1.1.0'
     apt 'com.bluelinelabs:logansquare-compiler:1.1.0'
