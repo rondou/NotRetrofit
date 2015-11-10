@@ -471,6 +471,7 @@ public class GitHubAuthInterceptor extends AuthenticationInterceptor {
 1. Add `@Retrofit("https://api.github.com")` line
 2. Change `interface GitHub` to `abstract class GitHub`
 3. Add `public static GitHub create() { return new Retrofit_GitHub(); }`
+4. Use `@Retrofit.Body`, `@Retrofit.Part`, `@Retrofit.Field` instead of `@Body`, `@Part`, `@Field`.
 
 For example:
 
