@@ -541,8 +541,6 @@ public class RetrofitProcessor extends AbstractProcessor {
     public String buildBody(ExecutableElement method) {
       String body = "";
 
-      if (method.getAnnotation(Retrofit.POST.class) == null && method.getAnnotation(retrofit.http.POST.class) == null) return body;
-
       List<? extends VariableElement> parameters = method.getParameters();
       for (VariableElement parameter : parameters) {
         if (parameter.getAnnotation(Retrofit.Body.class) != null || method.getAnnotation(retrofit.http.Body.class) != null) {

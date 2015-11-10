@@ -13,15 +13,8 @@
  */
 package com.github.retrofit2;
 
-import retrofit.http.*;
-import retrofit.http.Retrofit.RetryHeaders;
-import retrofit.http.Retrofit.ErrorHandler;
-import retrofit.http.Retrofit.RequestInterceptor;
-import retrofit.http.Retrofit.LogLevel;
-import retrofit.http.Retrofit.Bindable;
-import retrofit.http.Retrofit.QueryBinding;
-import retrofit.http.Retrofit.Authenticator;
-import retrofit.http.Retrofit.Authenticated;
+import retrofit.http.Retrofit.*;
+import retrofit.http.Retrofit;
 
 import rx.Observable;
 import java.io.File;
@@ -133,6 +126,9 @@ public abstract class GitHub {
 
     @POST("/user/edit")
     public abstract Observable<Contributor> updateUser(@Body Contributor user);
+
+    @PUT("/user/edit")
+    public abstract Observable<Contributor> putUser(@Body Contributor user);
 
     @FormUrlEncoded
     @POST("/user/edit")

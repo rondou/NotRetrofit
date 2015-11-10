@@ -250,7 +250,7 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
     #if ($p.get)
 
-    #elseif ($p.post)
+    #elseif ($p.post || $p.put)
         #if ($p.body && $p.body != "")
 
         TypedOutput typedOutput = null;
@@ -262,7 +262,16 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
             //throw retrofit.RetrofitError.unexpectedError(_finalUrl, e);
         }
         //if (bodyString == null) throw new NullPointerException();
+
+            #if ($p.post)
+
         requestBuilder.post(RequestBody.create(MediaType.parse(typedOutput.mimeType()), bodyString));
+
+            #elseif ($p.put)
+
+        requestBuilder.put(RequestBody.create(MediaType.parse(typedOutput.mimeType()), bodyString));
+
+            #end
 
         #elseif (!$p.fields.isEmpty())
 
@@ -274,16 +283,34 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
 
             #end
 
+            #if ($p.post)
+
         requestBuilder.post(formBuilder.build());
+
+            #elseif ($p.put)
+
+        requestBuilder.put(formBuilder.build());
+
+            #end
 
         #else
 
+        ## empty body
+
         FormEncodingBuilder formBuilder = new FormEncodingBuilder();
+
+            #if ($p.post)
 
         requestBuilder.post(formBuilder.build());
 
+            #elseif ($p.put)
+
+        requestBuilder.put(formBuilder.build());
+
+            #end
+
         #end
-    #elseif ($p.put)
+
         #if (!$p.parts.isEmpty())
 
         MultipartBuilder partsBuilder = new MultipartBuilder().type(MultipartBuilder.FORM);
@@ -327,11 +354,28 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
                 #end
             #end
 
+            #if ($p.post)
+
+        requestBuilder.post(partsBuilder.build());
+
+            #elseif ($p.put)
+
         requestBuilder.put(partsBuilder.build());
+
+            #end
 
         #else
 
+            #if ($p.post)
+
+        requestBuilder.post(RequestBody.create(MediaType.parse(_MIME_APP_JSON_CHARSET_UTF8), ""));
+
+            #elseif ($p.put)
+
         requestBuilder.put(RequestBody.create(MediaType.parse(_MIME_APP_JSON_CHARSET_UTF8), ""));
+
+            #end
+
 
         #end
 
