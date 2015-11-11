@@ -63,7 +63,7 @@ publish {
     groupId = 'com.infstory'
     artifactId = 'retrofit-processor'
     //uploadName = ''
-    publishVersion = '2.0.4'
+    publishVersion = '2.0.5'
     desc = 'Type-safe REST client for Android and Java'
     website = 'https://github.com/yongjhih/NotRetrofit'
     bintrayUser = getRepositoryUsername()
