@@ -130,9 +130,16 @@ public abstract class GitHub {
     @PUT("/user/edit")
     public abstract Observable<Contributor> putUser(@Body Contributor user);
 
+    @PATCH("/user/edit")
+    public abstract Observable<Contributor> patchUserByBody(@Body Contributor user);
+
     @FormUrlEncoded
     @POST("/user/edit")
     public abstract Observable<Contributor> updateUser(@Field("first_name") String first, @Field("last_name") String last);
+
+    @FormUrlEncoded
+    @PATCH("/user/edit")
+    public abstract Observable<Contributor> patchUserByField(@Field("first_name") String first, @Field("last_name") String last);
 
     @Multipart
     @PUT("/user/photo")
@@ -146,6 +153,9 @@ public abstract class GitHub {
     @Multipart
     @PUT("/user/photo")
     public abstract Observable<Contributor> updateUserWithTypedString(@Part("photo") TypedFile photo, @Part("description") TypedString description);
+    @Multipart
+    @PATCH("/user/photo")
+    public abstract Observable<Contributor> patchUserWithTypedString(@Part("photo") TypedFile photo, @Part("description") TypedString description);
 
     @Headers("Cache-Control: max-age=640000")
     @GET("/widget/list")

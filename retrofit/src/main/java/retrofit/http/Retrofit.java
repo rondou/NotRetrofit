@@ -461,6 +461,7 @@ public @interface Retrofit {
   @RestMethod(value = "PATCH", hasBody = true)
   public @interface PATCH {
     String value();
+    String[] permissions() default {};
   }
 
   /**

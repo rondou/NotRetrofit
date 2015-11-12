@@ -246,6 +246,7 @@ public class RetrofitProcessor extends AbstractProcessor {
     private final List<String> queryBundles;
     private final boolean isGet;
     private final boolean isPut;
+    private final boolean isPatch;
     private final boolean isPost;
     private final boolean isDelete;
     private final boolean isHead;
@@ -294,6 +295,7 @@ public class RetrofitProcessor extends AbstractProcessor {
       this.queryBundles = buildQueryBundles(method);
       this.isGet = buildIsGet(method);
       this.isPut = buildIsPut(method);
+      this.isPatch = buildIsPatch(method);
       this.isPost = buildIsPost(method);
       this.isDelete = buildIsDelete(method);
       this.isHead = buildIsHead(method);
@@ -505,6 +507,11 @@ public class RetrofitProcessor extends AbstractProcessor {
       return method.getAnnotation(Retrofit.PUT.class) != null || method.getAnnotation(retrofit.http.PUT.class) != null;
     }
 
+    public boolean buildIsPatch(ExecutableElement method) {
+      // TODO duplicated routine
+      return method.getAnnotation(Retrofit.PATCH.class) != null || method.getAnnotation(retrofit.http.PATCH.class) != null;
+    }
+
     public boolean buildIsDelete(ExecutableElement method) {
       // TODO duplicated routine
       return method.getAnnotation(Retrofit.DELETE.class) != null || method.getAnnotation(retrofit.http.DELETE.class) != null;
@@ -553,6 +560,7 @@ public class RetrofitProcessor extends AbstractProcessor {
     public List<String> buildPermissions(ExecutableElement method) {
       Retrofit.GET get = method.getAnnotation(Retrofit.GET.class);
       Retrofit.PUT put = method.getAnnotation(Retrofit.PUT.class);
+      Retrofit.PATCH patch = method.getAnnotation(Retrofit.PATCH.class);
       Retrofit.POST post = method.getAnnotation(Retrofit.POST.class);
       Retrofit.DELETE delete = method.getAnnotation(Retrofit.DELETE.class);
       Retrofit.HEAD head = method.getAnnotation(Retrofit.HEAD.class);
@@ -561,6 +569,7 @@ public class RetrofitProcessor extends AbstractProcessor {
       if (post != null) return Arrays.asList(post.permissions());
       if (delete != null) return Arrays.asList(delete.permissions());
       if (head != null) return Arrays.asList(head.permissions());
+      if (patch != null) return Arrays.asList(patch.permissions());
       return Collections.emptyList();
     }
 
@@ -688,21 +697,25 @@ public class RetrofitProcessor extends AbstractProcessor {
       String rawPath = null;
       Retrofit.GET get = method.getAnnotation(Retrofit.GET.class);
       Retrofit.PUT put = method.getAnnotation(Retrofit.PUT.class);
+      Retrofit.PATCH patch = method.getAnnotation(Retrofit.PATCH.class);
       Retrofit.POST post = method.getAnnotation(Retrofit.POST.class);
       Retrofit.DELETE delete = method.getAnnotation(Retrofit.DELETE.class);
       Retrofit.HEAD head = method.getAnnotation(Retrofit.HEAD.class);
       if (get != null) rawPath = get.value();
       if (put != null) rawPath = put.value();
+      if (patch != null) rawPath = patch.value();
       if (post != null) rawPath = post.value();
       if (delete != null) rawPath = delete.value();
       if (head != null) rawPath = head.value();
       retrofit.http.GET get1 = method.getAnnotation(retrofit.http.GET.class);
       retrofit.http.PUT put1 = method.getAnnotation(retrofit.http.PUT.class);
+      retrofit.http.PATCH patch1 = method.getAnnotation(retrofit.http.PATCH.class);
       retrofit.http.POST post1 = method.getAnnotation(retrofit.http.POST.class);
       retrofit.http.DELETE delete1 = method.getAnnotation(retrofit.http.DELETE.class);
       retrofit.http.HEAD head1 = method.getAnnotation(retrofit.http.HEAD.class);
       if (get1 != null) rawPath = get1.value();
       if (put1 != null) rawPath = put1.value();
+      if (patch1 != null) rawPath = patch1.value();
       if (post1 != null) rawPath = post1.value();
       if (delete1 != null) rawPath = delete1.value();
       if (head1 != null) rawPath = head1.value();
@@ -944,6 +957,10 @@ public class RetrofitProcessor extends AbstractProcessor {
 
     public boolean isPut() {
       return isPut;
+    }
+
+    public boolean isPatch() {
+      return isPatch;
     }
 
     public boolean isPost() {
