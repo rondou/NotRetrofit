@@ -618,7 +618,7 @@ or via jitpack:
 ```java
 repositories {
     jcenter()
-    mavne { url "https://jitpack.io" }
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
