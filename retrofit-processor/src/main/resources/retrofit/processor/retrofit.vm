@@ -524,7 +524,7 @@ public final class $subclass$formalTypes extends $origClass$actualTypes {
         }).onErrorResumeNext(new Func1<Throwable, Observable<com.squareup.okhttp.Response>>() {
             @Override public Observable<com.squareup.okhttp.Response> call(Throwable e) {
                 if (e instanceof IOException) {
-                    return Observable.error(retrofit.RetrofitError.networkError(_finalUrl, (IOException) e));
+                    return Observable.error(errorHandler.handleError(retrofit.RetrofitError.networkError(_finalUrl, (IOException) e)));
                 }
                 return Observable.error(e);
             }
